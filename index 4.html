@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мозаика России — обучающая игра</title>
+<style>
+  :root{
+    --bg1:#ff9a56;
+    --bg2:#ff6a88;
+    --bg3:#845ec2;
+    --accent:#00c9a7;
+    --accent2:#ffd166;
+    --card-bg:#ffffff;
+    --text-dark:#2d2140;
+    --radius:22px;
+    --shadow: 0 10px 25px rgba(0,0,0,.18);
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    font-family: "Trebuchet MS", "Verdana", "Segoe UI", sans-serif;
+    color:var(--text-dark);
+  }
+  body{
+    background: linear-gradient(135deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+    background-attachment: fixed;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px;
+  }
+  #app{
+    width:100%;
+    max-width:1100px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .screen{display:none;}
+  .screen.active{display:block; animation: fadeIn .35s ease;}
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(6px);
+    border-radius: var(--radius);
+    padding:14px 20px;
+    box-shadow: var(--shadow);
+  }
+  .logo{
+    font-size:1.6rem;
+    font-weight:800;
+    color:#fff;
+    text-shadow: 0 3px 8px rgba(0,0,0,.25);
+    display:flex; align-items:center; gap:10px;
+  }
+  .topbar .stats{
+    display:flex; gap:10px; flex-wrap:wrap;
+  }
+  .pill{
+    background:#fff;
+    border-radius: 999px;
+    padding:8px 16px;
+    font-weight:700;
+    font-size:.95rem;
+    box-shadow: var(--shadow);
+    display:flex; align-items:center; gap:6px;
+  }
+  .diff-switch{
+    display:flex;
+    background:rgba(255,255,255,.9);
+    border-radius: 999px;
+    padding:4px;
+    box-shadow: var(--shadow);
+  }
+  .diff-switch button{
+    border:none;
+    background:transparent;
+    padding:8px 14px;
+    border-radius:999px;
+    font-weight:700;
+    cursor:pointer;
+    font-size:.9rem;
+    color:var(--text-dark);
+    transition:.2s;
+  }
+  .diff-switch button.active{
+    background: linear-gradient(135deg,var(--accent),#00a888);
+    color:#fff;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    border:none;
+    border-radius: 16px;
+    padding:12px 22px;
+    font-weight:800;
+    font-size:1rem;
+    cursor:pointer;
+    box-shadow: var(--shadow);
+    transition: transform .15s ease, box-shadow .15s ease;
+    color:#fff;
+  }
+  .btn:active{ transform: scale(.95); }
+  .btn:hover{ transform: translateY(-2px); }
+  .btn-primary{ background: linear-gradient(135deg,#ff7eb3,#ff758c); }
+  .btn-accent{ background: linear-gradient(135deg,#00c9a7,#00a888); }
+  .btn-secondary{ background: linear-gradient(135deg,#845ec2,#5b3d99); }
+  .btn-ghost{ background:#fff; color:var(--text-dark); }
+
+  /* ---------- Map screen ---------- */
+  .map-intro{
+    background: rgba(255,255,255,.92);
+    border-radius: var(--radius);
+    padding:20px 24px;
+    box-shadow: var(--shadow);
+    text-align:center;
+  }
+  .map-intro h1{ margin:0 0 8px; font-size:1.6rem; }
+  .map-intro p{ margin:0; font-size:1.05rem; color:#5a5170;}
+
+  .regions{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap:18px;
+  }
+  .region-card{
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding:18px;
+    box-shadow: var(--shadow);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .region-card h2{
+    margin:0;
+    font-size:1.25rem;
+    display:flex; align-items:center; gap:8px;
+  }
+  .region-progress-bar{
+    height:14px;
+    border-radius:999px;
+    background:#eee;
+    overflow:hidden;
+  }
+  .region-progress-fill{
+    height:100%;
+    background: linear-gradient(90deg,var(--accent),var(--accent2));
+    width:0%;
+    transition: width .4s ease;
+  }
+  .peoples-mini{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .mini-badge{
+    background:#f4f1fb;
+    border-radius:12px;
+    padding:6px 10px;
+    font-size:.85rem;
+    font-weight:700;
+    display:flex; align-items:center; gap:4px;
+  }
+  .mini-badge.done{ background: linear-gradient(135deg,#d8fff2,#c2ffe0); color:#08805f; }
+
+  .badges-shelf{
+    background: rgba(255,255,255,.92);
+    border-radius: var(--radius);
+    padding:16px 20px;
+    box-shadow: var(--shadow);
+  }
+  .badges-shelf h3{ margin:0 0 10px; font-size:1.1rem; }
+  .badges-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .badge-icon{
+    width:56px;height:56px;
+    border-radius:50%;
+    background: linear-gradient(135deg,var(--accent2),#ffb703);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem;
+    box-shadow: var(--shadow);
+  }
+  .badge-icon.locked{
+    background:#e4e4ef; filter:grayscale(1); opacity:.6;
+  }
+
+  /* ---------- Match screen ---------- */
+  .match-header{
+    background: rgba(255,255,255,.92);
+    border-radius: var(--radius);
+    padding:14px 20px;
+    box-shadow: var(--shadow);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .match-header h2{ margin:0; font-size:1.3rem; }
+  .hint-text{
+    background: rgba(255,255,255,.92);
+    border-radius: var(--radius);
+    padding:10px 18px;
+    font-weight:700;
+    text-align:center;
+    box-shadow: var(--shadow);
+    min-height:20px;
+  }
+  .match-columns{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:18px;
+  }
+  @media (max-width: 760px){
+    .match-columns{ grid-template-columns: 1fr; }
+  }
+  .column-title{
+    color:#fff;
+    font-weight:800;
+    margin:0 0 8px 4px;
+    text-shadow: 0 2px 6px rgba(0,0,0,.25);
+  }
+  .people-list, .attr-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .person-card{
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding:14px 16px;
+    box-shadow: var(--shadow);
+    cursor:pointer;
+    border:3px solid transparent;
+    transition: .18s;
+  }
+  .person-card.selected{
+    border-color: var(--accent);
+    transform: scale(1.02);
+  }
+  .person-card.complete{
+    background: linear-gradient(135deg,#e9fff5,#d3ffe9);
+    border-color:#00c9a7;
+  }
+  .person-card.wrong-shake{ animation: shake .4s; }
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-6px);}
+    75%{transform:translateX(6px);}
+  }
+  .person-name{
+    font-size:1.15rem;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+  .person-slots{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .slot{
+    flex:1;
+    min-width:80px;
+    background:#f4f1fb;
+    border-radius:12px;
+    padding:8px;
+    font-size:.8rem;
+    text-align:center;
+    color:#8a80a0;
+    min-height:44px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .slot.filled{
+    background: linear-gradient(135deg,#fff4d6,#ffe6a1);
+    color:var(--text-dark);
+    font-weight:700;
+  }
+
+  .attr-card{
+    background: var(--card-bg);
+    border-radius:16px;
+    padding:12px 14px;
+    box-shadow: var(--shadow);
+    cursor:grab;
+    font-size:.95rem;
+    border:3px solid transparent;
+    transition:.18s;
+    user-select:none;
+  }
+  .attr-card .cat{
+    font-size:.75rem;
+    font-weight:800;
+    color:#9b8fc4;
+    text-transform:uppercase;
+    margin-bottom:4px;
+  }
+  .attr-card.selected{ border-color: var(--accent2); }
+  .attr-card.matched{
+    opacity:0;
+    pointer-events:none;
+    height:0;
+    padding:0;
+    margin:0;
+    overflow:hidden;
+  }
+  .attr-card.wrong-shake{ animation: shake .4s; border-color:#ff8fa3;}
+  .attr-card.dragover-target{ border-color: var(--accent); }
+  .fact-extra{
+    font-size:.75rem;
+    color:#7c6fa0;
+    margin-top:4px;
+    font-style:italic;
+  }
+
+  /* ---------- Modal: Неловкий турист ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background: rgba(30,15,50,.55);
+    z-index:50;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  .modal-overlay.active{ display:flex; }
+  .modal-box{
+    background:#fff;
+    border-radius:24px;
+    max-width:520px;
+    width:100%;
+    padding:24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    animation: popIn .3s ease;
+    max-height:90vh;
+    overflow-y:auto;
+  }
+  @keyframes popIn{
+    from{ transform: scale(.85); opacity:0; }
+    to{ transform: scale(1); opacity:1; }
+  }
+  .modal-box h3{
+    margin:0 0 6px;
+    font-size:1.3rem;
+    display:flex; align-items:center; gap:8px;
+  }
+  .modal-box .situation-text{
+    background:#f4f1fb;
+    border-radius:14px;
+    padding:14px;
+    margin:10px 0 16px;
+    font-size:1rem;
+    line-height:1.4;
+  }
+  .option-btn{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:#fff;
+    border:2px solid #e4defa;
+    border-radius:14px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+    font-size:.95rem;
+    font-weight:600;
+    transition:.15s;
+  }
+  .option-btn:hover{ border-color: var(--accent); }
+  .option-btn.picked-good{ border-color:#00c9a7; background:#e9fff5; }
+  .option-btn.picked-neutral{ border-color:#ffb703; background:#fff8e6; }
+  .option-btn.picked-bad{ border-color:#ff6a88; background:#fff0f2; }
+  .explanation-box{
+    border-radius:14px;
+    padding:14px;
+    margin-top:8px;
+    font-size:.95rem;
+    line-height:1.4;
+  }
+  .explanation-box.good{ background:#e9fff5; border:2px solid #00c9a7; }
+  .explanation-box.neutral{ background:#fff8e6; border:2px solid #ffb703; }
+  .explanation-box.bad{ background:#fff0f2; border:2px solid #ff6a88; }
+  .bonus-line{
+    margin-top:10px;
+    font-weight:800;
+    color:#08805f;
+  }
+  .modal-actions{ text-align:right; margin-top:16px; }
+
+  /* ---------- Result screen ---------- */
+  .result-card{
+    background: rgba(255,255,255,.95);
+    border-radius: var(--radius);
+    padding:28px;
+    text-align:center;
+    box-shadow: var(--shadow);
+  }
+  .stars{ font-size:2.6rem; margin:10px 0; }
+  .result-badges{
+    display:flex; justify-content:center; gap:14px; margin:16px 0;
+  }
+  .result-fact{
+    background:#f4f1fb;
+    border-radius:16px;
+    padding:16px;
+    margin:16px auto;
+    max-width:520px;
+    font-size:1rem;
+  }
+  .result-actions{
+    display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:16px;
+  }
+  .score-big{
+    font-size:1.4rem;
+    font-weight:800;
+    color:#845ec2;
+  }
+  footer.credits{
+    text-align:center;
+    color:rgba(255,255,255,.85);
+    font-size:.8rem;
+    padding:10px;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ HEADER ============ -->
+  <div class="topbar">
+    <div class="logo">🧩 Мозаика России</div>
+    <div class="stats">
+      <div class="pill">⭐ <span id="scoreDisplay">0</span></div>
+      <div class="pill">🏅 <span id="badgeCountDisplay">0</span>/9</div>
+    </div>
+    <div class="diff-switch">
+      <button id="diffEasyBtn">🧒 7–10 лет</button>
+      <button id="diffHardBtn">🧑 11–14 лет</button>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: MAP ============ -->
+  <div class="screen active" id="screen-map">
+    <div class="map-intro">
+      <h1>Добро пожаловать в путешествие по России! 🗺️</h1>
+      <p>Выбери регион и узнай о народах, которые там живут: их костюмы, блюда и речь.</p>
+    </div>
+
+    <div class="regions" id="regionsContainer"></div>
+
+    <div class="badges-shelf">
+      <h3>Твоя коллекция значков 🏅</h3>
+      <div class="badges-row" id="badgesShelf"></div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: MATCH ============ -->
+  <div class="screen" id="screen-match">
+    <div class="match-header">
+      <h2 id="matchRegionTitle">Регион</h2>
+      <button class="btn btn-ghost" id="backToMapBtn">⬅ На карту</button>
+    </div>
+    <div class="hint-text" id="hintText">Выбери народ слева, потом — подходящий атрибут справа. Можно и перетаскивать! 🖱️</div>
+    <div class="match-columns">
+      <div>
+        <p class="column-title">👥 Народы</p>
+        <div class="people-list" id="peopleList"></div>
+      </div>
+      <div>
+        <p class="column-title">🎨 Костюм, 🍽️ блюдо, 💬 говор</p>
+        <div class="attr-list" id="attrList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN: RESULT ============ -->
+  <div class="screen" id="screen-result">
+    <div class="result-card">
+      <h1>Регион пройден! 🎉</h1>
+      <div class="stars" id="resultStars"></div>
+      <div class="score-big">+<span id="resultScore">0</span> очков</div>
+      <p>Новые значки в коллекции:</p>
+      <div class="result-badges" id="resultBadges"></div>
+      <div class="result-fact" id="resultFact"></div>
+      <div class="result-actions">
+        <button class="btn btn-accent" id="nextRegionBtn">Дальше ▶</button>
+        <button class="btn btn-secondary" id="toMapBtn">🗺️ На карту</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ MODAL: НЕЛОВКИЙ ТУРИСТ ============ -->
+<div class="modal-overlay" id="touristModal">
+  <div class="modal-box">
+    <h3>🧳 Неловкий турист</h3>
+    <div class="situation-text" id="modalSituationText"></div>
+    <div id="modalOptions"></div>
+    <div id="modalExplanationWrap"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="modalContinueBtn" style="display:none;">Продолжить ▶</button>
+    </div>
+  </div>
+</div>
+
+<footer class="credits">Прототип обучающей игры «Мозаика России» · для детей 7–14 лет</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================================================
+   1. ДАННЫЕ ОБ ИГРЕ
+====================================================== */
+const REGIONS = [
+  {
+    id: "kavkaz",
+    name: "Северный Кавказ",
+    emoji: "🏔️",
+    peoples: [
+      {
+        id: "chechens",
+        name: "Чеченцы",
+        region: "kavkaz",
+        costume: "🧥 Черкеска с газырями и высокая папаха",
+        dish: "🥟 Жижиг-галнаш — мясо с галушками и чесночной подливой",
+        speech: "🗣️ «Маршалла» — доброе пожелание при встрече",
+        fact: "У чеченцев главный кусок мяса на столе всегда достаётся гостю — это знак глубокого уважения.",
+        situation: {
+          text: "Ты в гостях в чеченской семье. Хозяева приглашают тебя за стол и кладут в твою тарелку самый большой кусок мяса. Что ты сделаешь?",
+          options: [
+            { text: "Поблагодарю и с удовольствием попробую — ведь это знак уважения к гостю", type: "эмпатичный" },
+            { text: "Вежливо откажусь, скажу, что не голоден", type: "нейтральный" },
+            { text: "Скажу, что это слишком много, и отодвину тарелку в сторону", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Ты прав! У многих кавказских народов лучший кусок отдают гостю — это знак большого уважения. Принять угощение — значит уважить хозяев.",
+            "нейтральный": "Отказ не сильно обидит хозяев, но лучше немного попробовать — так ты покажешь, что ценишь их гостеприимство.",
+            "неуважительный": "Так поступать не стоит: резкий отказ от угощения может обидеть хозяев, ведь для них это проявление заботы о госте."
+          },
+          bonus: "Подсказка: одна пара подсветится сама на следующем шаге ✨"
+        }
+      },
+      {
+        id: "avars",
+        name: "Аварцы",
+        region: "kavkaz",
+        costume: "🧕 Платье-рубаха «гортдан» с серебряным поясом и чухта",
+        dish: "🍞 Хинкал — отварное тесто с мясом и чесночной подливой",
+        speech: "🗣️ Аварский язык — один из самых сложных на Кавказе, более 40 диалектов",
+        fact: "Аварцы живут в высокогорных сёлах Дагестана и славятся башенной архитектурой.",
+        situation: {
+          text: "Ты идёшь по узкой горной тропе в аварском селе, навстречу — пожилой мужчина. Как ты поступишь?",
+          options: [
+            { text: "Уступлю дорогу и поздороваюсь первым — так принято уважать старших", type: "эмпатичный" },
+            { text: "Пройду мимо, просто кивнув", type: "нейтральный" },
+            { text: "Пройду первым, ведь я тоже тороплюсь", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Верно! На Кавказе особое уважение к старшим — уступить дорогу и поздороваться первым — признак хорошего воспитания.",
+            "нейтральный": "Кивок — это неплохо, но словесное приветствие и уступленная дорога — более тёплый жест уважения к старшим.",
+            "неуважительный": "Так лучше не делать: у горских народов уважение к старшим — одна из главных ценностей."
+          },
+          bonus: "Бонус: +1 дополнительная попытка при ошибке 🔁"
+        }
+      },
+      {
+        id: "kabardins",
+        name: "Кабардинцы",
+        region: "kavkaz",
+        costume: "👘 Кафтан «сай» и высокая шапка с галуном",
+        dish: "🧀 Щипс — соус с курицей и аджикой, подаётся с пастой (кукурузной кашей)",
+        speech: "🗣️ «Адыгэ Хабзэ» — древний свод правил вежливости и гостеприимства",
+        fact: "У кабардинцев конный спорт и джигитовка — часть праздничных традиций.",
+        situation: {
+          text: "На кабардинской свадьбе тебя приглашают потанцевать традиционный танец, но ты не знаешь движений. Что ты сделаешь?",
+          options: [
+            { text: "Попробую повторить движения за другими и с улыбкой приму приглашение", type: "эмпатичный" },
+            { text: "Вежливо откажусь и просто посмотрю со стороны", type: "нейтральный" },
+            { text: "Начну танцевать по-своему и посмеиваться над тем, как танцуют другие", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Отлично! Даже если не всё получается — участие и уважение к традиции ценится больше, чем идеальное исполнение.",
+            "нейтральный": "Это нормально — не всем комфортно танцевать на людях, но попытка была бы приятна хозяевам.",
+            "неуважительный": "Так делать нельзя: смеяться над чужой культурой обидно и невежливо по отношению к хозяевам."
+          },
+          bonus: "Бонус: минус одно штрафное очко 🧹"
+        }
+      }
+    ]
+  },
+  {
+    id: "povolzhye",
+    name: "Поволжье",
+    emoji: "🌾",
+    peoples: [
+      {
+        id: "tatars",
+        name: "Татары",
+        region: "povolzhye",
+        costume: "🧣 Камзол и калфак — женский головной убор с монистами",
+        dish: "🥮 Эчпочмак — треугольный пирожок с мясом и картофелем",
+        speech: "🗣️ «Рәхим итегез» — «Добро пожаловать» по-татарски",
+        fact: "Казань — столица Татарстана, где рядом стоят кремль, мечеть и православный собор.",
+        situation: {
+          text: "Ты в гостях у татарской семьи на празднике Ураза-байрам, тебя угощают чак-чаком. Что ты сделаешь?",
+          options: [
+            { text: "Поблагодарю, попробую угощение и спрошу о традиции праздника", type: "эмпатичный" },
+            { text: "Молча съем, ни о чём не спрашивая", type: "нейтральный" },
+            { text: "Скажу, что не люблю сладкое, и демонстративно отодвину тарелку", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Прекрасно! Интерес к традициям — лучший способ показать уважение к культуре хозяев.",
+            "нейтральный": "Можно и так, но вопрос о традиции сделал бы разговор теплее и интереснее для всех.",
+            "неуважительный": "Отказ с гримасой может обидеть — лучше вежливо объяснить, если что-то не по вкусу."
+          },
+          bonus: "Подсказка на следующем шаге ✨"
+        }
+      },
+      {
+        id: "bashkirs",
+        name: "Башкиры",
+        region: "povolzhye",
+        costume: "🧥 Елян — кафтан с нагрудником «hаҡал» из монет",
+        dish: "🍯 Бишбармак (мясо с лапшой) и кумыс — напиток из кобыльего молока",
+        speech: "🗣️ Эпос «Урал-батыр» передаётся сказителями-кураистами",
+        fact: "Башкирский мёд считается одним из самых знаменитых в мире.",
+        situation: {
+          text: "На башкирском празднике тебе предлагают кумыс — напиток из кобыльего молока с непривычным вкусом. Что ты сделаешь?",
+          options: [
+            { text: "Попробую немного, поблагодарю и честно поделюсь впечатлением", type: "эмпатичный" },
+            { text: "Возьму чашку, но пробовать не буду", type: "нейтральный" },
+            { text: "Скажу «фу», даже не попробовав", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Так держать! Пробовать новое с открытостью и вежливо делиться мнением — уважительно по отношению к хозяевам.",
+            "нейтральный": "Лучше всё же попробовать хотя бы немного — так ты покажешь искренний интерес к культуре.",
+            "неуважительный": "Резкая оценка без пробы может обидеть — ведь это любимый напиток хозяев."
+          },
+          bonus: "Бонус: дополнительная попытка 🔁"
+        }
+      },
+      {
+        id: "maris",
+        name: "Марийцы",
+        region: "povolzhye",
+        costume: "👗 Белая вышитая рубаха «тувыр» с орнаментом-оберегом",
+        dish: "🥧 Подкоголи — пельмени с творогом или крупой, со сметаной",
+        speech: "🗣️ Марийцы сохранили древнюю веру — молятся в священных рощах",
+        fact: "Марийцев называют «последними язычниками Европы» за сохранённые древние традиции.",
+        situation: {
+          text: "Тебя пригласили в священную рощу марийцев, где проходит моление. Что ты сделаешь?",
+          options: [
+            { text: "Буду вести себя тихо и уважительно, спрошу, как правильно себя вести", type: "эмпатичный" },
+            { text: "Просто постою в стороне и понаблюдаю", type: "нейтральный" },
+            { text: "Буду громко фотографировать всё вокруг для соцсетей", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Верно! Священные места требуют особого уважения — важно заранее спросить о правилах поведения.",
+            "нейтральный": "Наблюдать издалека — неплохо, но лучше уточнить правила, чтобы точно никого не смутить.",
+            "неуважительный": "Так поступать нельзя: громкие фото во время обряда могут оскорбить чувства верующих."
+          },
+          bonus: "Подсказка: снимаем штраф 🧹"
+        }
+      }
+    ]
+  },
+  {
+    id: "siberia",
+    name: "Сибирь",
+    emoji: "❄️",
+    peoples: [
+      {
+        id: "yakuts",
+        name: "Якуты (саха)",
+        region: "siberia",
+        costume: "🧤 Меховая шуба «сон» с орнаментом и шапка «дьабака»",
+        dish: "🐟 Строганина — тонко нарезанная замороженная рыба, и кумыс",
+        speech: "🗣️ Праздник Ысыах — встреча лета с обрядом благословения «алгыс»",
+        fact: "Якутия — самый холодный обитаемый регион планеты, зимой температура падает ниже −60°C.",
+        situation: {
+          text: "Ты попал на якутский праздник Ысыах. Уважаемый старейшина произносит благословение алгыс. Что ты сделаешь?",
+          options: [
+            { text: "Встану тихо и буду слушать с уважением, как остальные", type: "эмпатичный" },
+            { text: "Продолжу тихо разговаривать с другом", type: "нейтральный" },
+            { text: "Достану телефон и включу музыку, чтобы друзьям было веселее", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Именно так! Алгыс — важный обряд благословения, тишина и внимание — знак уважения к традиции.",
+            "нейтральный": "Тихий разговор может отвлекать других — лучше подождать окончания обряда.",
+            "неуважительный": "Так делать точно нельзя: это грубо прерывает торжественный момент для всех присутствующих."
+          },
+          bonus: "Бонус: +1 попытка 🔁"
+        }
+      },
+      {
+        id: "buryats",
+        name: "Буряты",
+        region: "siberia",
+        costume: "🧣 Дэгэл — халат с широким поясом и высокая шапка «юудэн»",
+        dish: "🥟 Буузы — паровые пельмени с мясным бульоном внутри",
+        speech: "🗣️ Приветствие «Сайн байна» и традиция обвязывать деревья лентами-хадаками",
+        fact: "Буряты живут у озера Байкал и считают его священным морем.",
+        situation: {
+          text: "На священной горе ты видишь дерево, обвязанное разноцветными лентами (хадаками). Что ты сделаешь?",
+          options: [
+            { text: "Не буду трогать ленты и спрошу у местных, что они означают", type: "эмпатичный" },
+            { text: "Сфотографирую издалека, не трогая дерево", type: "нейтральный" },
+            { text: "Сниму одну ленту себе на память", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Правильно! Ленты хадак — это подношения духам места, их нельзя снимать. Спросить о традиции — отличный способ узнать больше.",
+            "нейтральный": "Фото не навредит, но лучше ещё и узнать историю традиции у местных жителей.",
+            "неуважительный": "Так делать нельзя: это священное подношение, и брать его себе — неуважительно к верованиям бурят."
+          },
+          bonus: "Подсказка на следующем шаге ✨"
+        }
+      },
+      {
+        id: "tuvans",
+        name: "Тувинцы",
+        region: "siberia",
+        costume: "🧥 Тон — халат из овчины с кушаком и шапкой с меховой опушкой",
+        dish: "🍲 Далган-шай — чай с молоком, солью и обжаренной мукой",
+        speech: "🗣️ Тувинцы известны уникальным горловым пением — хоомей",
+        fact: "Хоомей позволяет петь одновременно два тона одним голосом — этому учатся годами.",
+        situation: {
+          text: "На тувинском празднике музыкант начинает горловое пение хоомей. Кто-то из туристов громко смеётся, думая, что это шутка. Что ты сделаешь?",
+          options: [
+            { text: "Объясню, что хоомей — древнее искусство, и попрошу послушать внимательно", type: "эмпатичный" },
+            { text: "Просто отойду в сторону, ничего не скажу", type: "нейтральный" },
+            { text: "Тоже начну смеяться вместе со всеми", type: "неуважительный" }
+          ],
+          explanations: {
+            "эмпатичный": "Отлично! Хоомей — уникальная традиция, объяснить это другим — значит защитить культуру от насмешек.",
+            "нейтральный": "Промолчать — не грубо, но твоё объяснение могло бы остановить неловкую ситуацию для музыканта.",
+            "неуважительный": "Так делать нельзя: смех над искусством, которое ты не понимаешь, может сильно обидеть исполнителя."
+          },
+          bonus: "Бонус: снимаем штраф и даём подсказку 🎁"
+        }
+      }
+    ]
+  }
+];
+
+/* ======================================================
+   2. СОСТОЯНИЕ И LOCALSTORAGE
+====================================================== */
+const STORAGE_KEY = "mozaika_rossii_save_v1";
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ console.warn("Не удалось прочитать сохранение", e); }
+  return { difficulty:"easy", score:0, donePeoples:[] };
+}
+
+// защитимся от опечатки ключа выше
+let state = Object.assign({ difficulty:"easy", score:0, donePeoples:[] }, loadState());
+if(!Array.isArray(state.donePeoples)) state.donePeoples = [];
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function allPeoples(){
+  return REGIONS.flatMap(r => r.peoples);
+}
+function getPeopleById(id){
+  return allPeoples().find(p => p.id === id);
+}
+function isPeopleDone(id){
+  return state.donePeoples.includes(id);
+}
+
+/* ======================================================
+   3. НАВИГАЦИЯ МЕЖДУ ЭКРАНАМИ
+====================================================== */
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* ======================================================
+   4. ЭКРАН КАРТЫ
+====================================================== */
+function renderTopbar(){
+  document.getElementById("scoreDisplay").textContent = state.score;
+  document.getElementById("badgeCountDisplay").textContent = state.donePeoples.length;
+  document.getElementById("diffEasyBtn").classList.toggle("active", state.difficulty === "easy");
+  document.getElementById("diffHardBtn").classList.toggle("active", state.difficulty === "hard");
+}
+
+function renderMap(){
+  renderTopbar();
+  const container = document.getElementById("regionsContainer");
+  container.innerHTML = "";
+
+  REGIONS.forEach(region => {
+    const doneCount = region.peoples.filter(p => isPeopleDone(p.id)).length;
+    const pct = Math.round((doneCount / region.peoples.length) * 100);
+
+    const card = document.createElement("div");
+    card.className = "region-card";
+    card.innerHTML = `
+      <h2>${region.emoji} ${region.name}</h2>
+      <div class="region-progress-bar"><div class="region-progress-fill" style="width:${pct}%"></div></div>
+      <div class="peoples-mini">
+        ${region.peoples.map(p => `<span class="mini-badge ${isPeopleDone(p.id) ? "done":""}">${isPeopleDone(p.id) ? "✅":"👤"} ${p.name}</span>`).join("")}
+      </div>
+      <button class="btn btn-primary" data-region="${region.id}">
+        ${doneCount === region.peoples.length ? "Пройти ещё раз 🔄" : (doneCount > 0 ? "Продолжить ▶" : "Начать 🚀")}
+      </button>
+    `;
+    card.querySelector("button").addEventListener("click", () => startRegion(region.id));
+    container.appendChild(card);
+  });
+
+  const shelf = document.getElementById("badgesShelf");
+  shelf.innerHTML = "";
+  allPeoples().forEach(p => {
+    const done = isPeopleDone(p.id);
+    const b = document.createElement("div");
+    b.className = "badge-icon" + (done ? "" : " locked");
+    b.title = p.name;
+    b.textContent = done ? peopleEmoji(p.id) : "❔";
+    shelf.appendChild(b);
+  });
+}
+
+function peopleEmoji(id){
+  const map = {
+    chechens:"🗡️", avars:"🏔️", kabardins:"🐎",
+    tatars:"🥮", bashkirs:"🍯", maris:"🌳",
+    yakuts:"❄️", buryats:"🌊", tuvans:"🎶"
+  };
+  return map[id] || "🏅";
+}
+
+document.getElementById("diffEasyBtn").addEventListener("click", () => { state.difficulty = "easy"; saveState(); renderTopbar(); });
+document.getElementById("diffHardBtn").addEventListener("click", () => { state.difficulty = "hard"; saveState(); renderTopbar(); });
+
+/* ======================================================
+   5. ЭКРАН СОПОСТАВЛЕНИЯ
+====================================================== */
+let currentRegion = null;
+let selectedPersonId = null;
+let matchState = {}; // { peopleId: { costume:bool, dish:bool, speech:bool } }
+let wrongAttempts = 0;
+let extraTriesLeft = 0;
+
+function startRegion(regionId){
+  currentRegion = REGIONS.find(r => r.id === regionId);
+  selectedPersonId = null;
+  wrongAttempts = 0;
+  extraTriesLeft = 0;
+  matchState = {};
+  currentRegion.peoples.forEach(p => {
+    matchState[p.id] = { costume:false, dish:false, speech:false };
+  });
+  renderMatchScreen();
+  showScreen("screen-match");
+}
+
+function renderMatchScreen(){
+  document.getElementById("matchRegionTitle").textContent = `${currentRegion.emoji} ${currentRegion.name}`;
+  document.getElementById("hintText").textContent = state.difficulty === "easy"
+    ? "Нажми на народ слева, потом на подходящую карточку справа! Можно и перетаскивать 🖱️"
+    : "Собери для каждого народа костюм, блюдо и говор. Клик или drag-and-drop — как удобнее.";
+
+  // левая колонка: народы
+  const peopleList = document.getElementById("peopleList");
+  peopleList.innerHTML = "";
+  currentRegion.peoples.forEach(p => {
+    const done = Object.values(matchState[p.id]).every(v => v);
+    const card = document.createElement("div");
+    card.className = "person-card" + (done ? " complete" : "") + (selectedPersonId === p.id ? " selected" : "");
+    card.dataset.id = p.id;
+    card.innerHTML = `
+      <div class="person-name">${done ? "✅" : "👤"} ${p.name}</div>
+      <div class="person-slots">
+        <div class="slot ${matchState[p.id].costume ? "filled":""}" data-type="costume">${matchState[p.id].costume ? "🎨 есть" : "🎨 костюм?"}</div>
+        <div class="slot ${matchState[p.id].dish ? "filled":""}" data-type="dish">${matchState[p.id].dish ? "🍽️ есть" : "🍽️ блюдо?"}</div>
+        <div class="slot ${matchState[p.id].speech ? "filled":""}" data-type="speech">${matchState[p.id].speech ? "💬 есть" : "💬 говор?"}</div>
+      </div>
+    `;
+    if(!done){
+      card.addEventListener("click", () => {
+        selectedPersonId = (selectedPersonId === p.id) ? null : p.id;
+        renderMatchScreen();
+      });
+      card.addEventListener("dragover", e => { e.preventDefault(); card.classList.add("dragover-target"); });
+      card.addEventListener("dragleave", () => card.classList.remove("dragover-target"));
+      card.addEventListener("drop", e => {
+        e.preventDefault();
+        card.classList.remove("dragover-target");
+        try{
+          const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+          attemptMatch(p.id, data.peopleId, data.type, card);
+        }catch(err){}
+      });
+    }
+    peopleList.appendChild(card);
+  });
+
+  // правая колонка: атрибуты (перемешаны)
+  const attrList = document.getElementById("attrList");
+  attrList.innerHTML = "";
+
+  let attrs = [];
+  currentRegion.peoples.forEach(p => {
+    attrs.push({ peopleId: p.id, type:"costume", label:"Костюм", text: p.costume });
+    attrs.push({ peopleId: p.id, type:"dish", label:"Блюдо", text: p.dish });
+    attrs.push({ peopleId: p.id, type:"speech", label:"Говор", text: p.speech });
+  });
+  attrs = shuffle(attrs, currentRegion.id); // стабильно перемешаны в рамках региона+загрузки
+
+  attrs.forEach(a => {
+    const isMatched = matchState[a.peopleId][a.type];
+    const card = document.createElement("div");
+    card.className = "attr-card" + (isMatched ? " matched" : "");
+    card.draggable = !isMatched;
+    card.dataset.people = a.peopleId;
+    card.dataset.type = a.type;
+    card.innerHTML = `<div class="cat">${a.label}</div>${a.text}` +
+      (state.difficulty === "hard" ? `<div class="fact-extra">${getPeopleById(a.peopleId).fact}</div>` : "");
+
+    if(!isMatched){
+      card.addEventListener("click", () => {
+        if(!selectedPersonId){
+          flashHint("Сначала выбери народ слева 👈");
+          return;
+        }
+        attemptMatch(selectedPersonId, a.peopleId, a.type, card);
+      });
+      card.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", JSON.stringify({ peopleId: a.peopleId, type: a.type }));
+      });
+    }
+    attrList.appendChild(card);
+  });
+}
+
+function flashHint(msg){
+  const hint = document.getElementById("hintText");
+  const old = hint.textContent;
+  hint.textContent = msg;
+  setTimeout(() => { hint.textContent = old; }, 1800);
+}
+
+function attemptMatch(personId, attrPeopleId, attrType, cardElem){
+  const personCardElem = document.querySelector(`.person-card[data-id="${personId}"]`);
+  if(attrPeopleId === personId){
+    // верно
+    matchState[personId][attrType] = true;
+    state.score += 10;
+    saveState();
+    const done = Object.values(matchState[personId]).every(v => v);
+    selectedPersonId = done ? null : personId;
+    renderMatchScreen();
+    renderTopbar();
+    if(done){
+      setTimeout(() => openTouristModal(personId), 400);
+    }
+  } else {
+    // неверно
+    if(extraTriesLeft > 0){
+      extraTriesLeft--;
+      flashHint("Не то, но у тебя была запасная попытка — очки не потеряны! 🔁");
+    } else {
+      wrongAttempts++;
+      state.score = Math.max(0, state.score - 2);
+      saveState();
+      flashHint("Не совсем! Попробуй ещё раз 🤔");
+    }
+    if(cardElem) { cardElem.classList.add("wrong-shake"); setTimeout(() => cardElem.classList.remove("wrong-shake"), 400); }
+    if(personCardElem) { personCardElem.classList.add("wrong-shake"); setTimeout(() => personCardElem.classList.remove("wrong-shake"), 400); }
+    renderTopbar();
+  }
+}
+
+// простая стабильная псевдослучайная перетасовка (по id региона), чтобы при каждом рендере не скакало
+function shuffle(array, seedStr){
+  let seed = 0;
+  for(let i=0;i<seedStr.length;i++) seed += seedStr.charCodeAt(i);
+  const arr = array.slice();
+  for(let i = arr.length - 1; i > 0; i--){
+    seed = (seed * 9301 + 49297) % 233280;
+    const j = Math.floor((seed / 233280) * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+document.getElementById("backToMapBtn").addEventListener("click", () => {
+  renderMap();
+  showScreen("screen-map");
+});
+
+/* ======================================================
+   6. МОДАЛКА «НЕЛОВКИЙ ТУРИСТ»
+====================================================== */
+let pendingPersonId = null;
+
+function typeToClass(type){
+  if(type === "эмпатичный") return "good";
+  if(type === "нейтральный") return "neutral";
+  return "bad";
+}
+function typeToOptionClass(type){
+  if(type === "эмпатичный") return "picked-good";
+  if(type === "нейтральный") return "picked-neutral";
+  return "picked-bad";
+}
+
+function openTouristModal(personId){
+  pendingPersonId = personId;
+  const p = getPeopleById(personId);
+  document.getElementById("modalSituationText").textContent = p.situation.text;
+
+  const optionsWrap = document.getElementById("modalOptions");
+  optionsWrap.innerHTML = "";
+  const explWrap = document.getElementById("modalExplanationWrap");
+  explWrap.innerHTML = "";
+  document.getElementById("modalContinueBtn").style.display = "none";
+
+  // перемешаем варианты, чтобы правильный не был всегда первым
+  const opts = shuffle(p.situation.options, personId);
+
+  opts.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.textContent = opt.text;
+    btn.addEventListener("click", () => chooseOption(opt, optionsWrap));
+    optionsWrap.appendChild(btn);
+  });
+
+  document.getElementById("touristModal").classList.add("active");
+}
+
+function chooseOption(opt, optionsWrap){
+  const p = getPeopleById(pendingPersonId);
+  // блокируем все кнопки, подсвечиваем выбранную
+  Array.from(optionsWrap.children).forEach(btn => {
+    btn.disabled = true;
+    btn.style.cursor = "default";
+    if(btn.textContent === opt.text){
+      btn.classList.add(typeToOptionClass(opt.type));
+    }
+  });
+
+  const explWrap = document.getElementById("modalExplanationWrap");
+  const cls = typeToClass(opt.type);
+  let bonusLine = "";
+  if(opt.type === "эмпатичный"){
+    state.score += 15;
+    applyBonus(p.situation.bonus);
+    bonusLine = `<div class="bonus-line">🎁 ${p.situation.bonus}</div>`;
+  } else if(opt.type === "нейтральный"){
+    state.score += 5;
+  }
+  saveState();
+  renderTopbar();
+
+  explWrap.innerHTML = `
+    <div class="explanation-box ${cls}">
+      <strong>${opt.type === "эмпатичный" ? "Отличный выбор! 🌟" : (opt.type === "нейтральный" ? "Неплохо, но можно лучше 🙂" : "Так делать не стоит 💭")}</strong>
+      <p style="margin:6px 0 0;">${p.situation.explanations[opt.type]}</p>
+      ${bonusLine}
+    </div>
+  `;
+
+  document.getElementById("modalContinueBtn").style.display = "inline-block";
+}
+
+function applyBonus(bonusText){
+  if(bonusText.includes("попытка")){
+    extraTriesLeft += 1;
+  } else if(bonusText.includes("штраф")){
+    // компенсируем один недавний штраф
+    state.score += 2;
+  } else if(bonusText.includes("Подсказка")){
+    // подсветим случайную нерешённую пару на 1.2 сек (после закрытия модалки)
+    window.__pendingHintHighlight = true;
+  }
+}
+
+document.getElementById("modalContinueBtn").addEventListener("click", () => {
+  document.getElementById("touristModal").classList.remove("active");
+
+  // отмечаем народ пройденным + значок
+  if(!isPeopleDone(pendingPersonId)){
+    state.donePeoples.push(pendingPersonId);
+    saveState();
+  }
+
+  const allDone = currentRegion.peoples.every(p => isPeopleDone(p.id));
+
+  if(window.__pendingHintHighlight){
+    window.__pendingHintHighlight = false;
+    highlightRandomUnsolved();
+  }
+
+  if(allDone){
+    setTimeout(() => showResultScreen(), 300);
+  } else {
+    renderMatchScreen();
+  }
+});
+
+function highlightRandomUnsolved(){
+  const cards = Array.from(document.querySelectorAll(".attr-card:not(.matched)"));
+  if(cards.length === 0) return;
+  const c = cards[Math.floor(Math.random() * cards.length)];
+  c.style.boxShadow = "0 0 0 4px var(--accent2)";
+  setTimeout(() => { c.style.boxShadow = ""; }, 1400);
+}
+
+/* ======================================================
+   7. ЭКРАН РЕЗУЛЬТАТА
+====================================================== */
+let regionScoreAtStart = 0;
+
+function showResultScreen(){
+  const starsCount = wrongAttempts <= 1 ? 3 : (wrongAttempts <= 4 ? 2 : 1);
+  document.getElementById("resultStars").textContent = "⭐".repeat(starsCount) + "☆".repeat(3 - starsCount);
+  document.getElementById("resultScore").textContent = currentRegion.peoples.length * 10 * 3; // приблизительно
+
+  const badgesWrap = document.getElementById("resultBadges");
+  badgesWrap.innerHTML = "";
+  currentRegion.peoples.forEach(p => {
+    const b = document.createElement("div");
+    b.className = "badge-icon";
+    b.title = p.name;
+    b.textContent = peopleEmoji(p.id);
+    badgesWrap.appendChild(b);
+  });
+
+  const facts = currentRegion.peoples.map(p => `• ${p.name}: ${p.fact}`).join("<br>");
+  document.getElementById("resultFact").innerHTML = `<strong>Знаешь ли ты?</strong><br>${facts}`;
+
+  renderTopbar();
+  showScreen("screen-result");
+}
+
+document.getElementById("nextRegionBtn").addEventListener("click", () => {
+  const idx = REGIONS.findIndex(r => r.id === currentRegion.id);
+  const next = REGIONS[(idx + 1) % REGIONS.length];
+  startRegion(next.id);
+});
+
+document.getElementById("toMapBtn").addEventListener("click", () => {
+  renderMap();
+  showScreen("screen-map");
+});
+
+/* ======================================================
+   8. СТАРТ ИГРЫ
+====================================================== */
+renderMap();
+showScreen("screen-map");
+
+})();
+</script>
+</body>
+</html>

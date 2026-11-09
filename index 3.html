@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мозаика России — путешествие по народам</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#1B2A4A;
+    --bg-panel:#22355C;
+    --bg-panel-light:#2C4270;
+    --cream:#F7EFDD;
+    --cream-dim:#EAE0C6;
+    --red:#C1453C;
+    --red-dark:#93332C;
+    --gold:#E8A93B;
+    --gold-light:#F3C878;
+    --teal:#3E9187;
+    --teal-dark:#2B6961;
+    --ink:#1B2A4A;
+    --ink-soft:#54648A;
+    --radius:16px;
+    --font-display:'Comfortaa', cursive;
+    --font-body:'Nunito', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(232,169,59,0.10), transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(62,145,135,0.14), transparent 45%),
+      var(--bg-deep);
+    color:var(--cream);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  button{font-family:inherit;}
+  button:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--gold-light);
+    outline-offset:2px;
+  }
+  .app{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
+  .screen{display:none;}
+  .screen.active{display:block; animation:fadein .35s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  .stitch{
+    height:9px;
+    background:repeating-linear-gradient(115deg, var(--gold) 0 5px, transparent 5px 11px);
+    border-radius:6px;
+    opacity:.85;
+  }
+
+  /* ---------- Title / hero ---------- */
+  .hero{
+    text-align:center;
+    padding:26px 10px 8px;
+  }
+  .hero-title{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(30px, 6vw, 46px);
+    margin:0;
+    color:var(--cream);
+    letter-spacing:.5px;
+  }
+  .hero-title span{color:var(--gold-light);}
+  .hero-sub{
+    font-size:16px;
+    color:var(--cream-dim);
+    margin:10px 0 18px;
+    max-width:480px;
+    margin-left:auto;margin-right:auto;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    border:none;
+    cursor:pointer;
+    border-radius:999px;
+    padding:14px 26px;
+    font-weight:800;
+    font-size:16px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{
+    background:var(--red);
+    color:var(--cream);
+    box-shadow:0 6px 0 var(--red-dark);
+  }
+  .btn-primary:hover{box-shadow:0 4px 0 var(--red-dark); transform:translateY(2px);}
+  .btn-secondary{
+    background:transparent;
+    color:var(--cream);
+    border:2px solid var(--cream-dim);
+  }
+  .btn-secondary:hover{background:rgba(247,239,221,.08);}
+  .btn-gold{
+    background:var(--gold);
+    color:var(--ink);
+    box-shadow:0 6px 0 #b5822a;
+  }
+  .btn-gold:hover{box-shadow:0 4px 0 #b5822a; transform:translateY(2px);}
+  .btn-block{width:100%;}
+  .btn-row{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:18px;}
+
+  /* ---------- Age select screen ---------- */
+  .age-cards{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    max-width:560px;
+    margin:24px auto;
+  }
+  @media (max-width:520px){.age-cards{grid-template-columns:1fr;}}
+  .age-card{
+    background:var(--bg-panel);
+    border:3px solid transparent;
+    border-radius:var(--radius);
+    padding:22px 16px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .age-card:hover{transform:translateY(-3px); border-color:var(--gold);}
+  .age-card .emoji{font-size:44px; display:block; margin-bottom:8px;}
+  .age-card h3{font-family:var(--font-display); margin:6px 0 4px; font-size:20px;}
+  .age-card p{margin:0; color:var(--cream-dim); font-size:14px;}
+
+  /* ---------- Map screen ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:10px;
+    margin-bottom:18px;
+  }
+  .topbar h2{font-family:var(--font-display); margin:0; font-size:24px;}
+  .stat-pills{display:flex; gap:8px; flex-wrap:wrap;}
+  .pill{
+    background:var(--bg-panel);
+    border-radius:999px;
+    padding:8px 14px;
+    font-weight:700;
+    font-size:14px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .region-list{display:flex; flex-direction:column; gap:14px; margin-top:10px;}
+  .region-card{
+    background:var(--bg-panel);
+    border-radius:var(--radius);
+    padding:18px;
+    display:flex; align-items:center; gap:16px;
+    border:2px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, border-color .15s ease, opacity .15s ease;
+    text-align:left;
+    width:100%;
+  }
+  .region-card:hover:not(.locked){transform:translateX(4px); border-color:var(--gold);}
+  .region-card.locked{opacity:.5; cursor:not-allowed;}
+  .region-card .r-icon{
+    font-size:38px;
+    width:64px;height:64px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg-panel-light);
+    border-radius:14px;
+    flex-shrink:0;
+  }
+  .region-card .r-body{flex:1;}
+  .region-card h3{margin:0 0 4px; font-family:var(--font-display); font-size:19px;}
+  .region-card p{margin:0; color:var(--cream-dim); font-size:13px;}
+  .status-tag{
+    font-size:12px;
+    font-weight:800;
+    padding:5px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .status-done{background:var(--teal); color:var(--cream);}
+  .status-open{background:var(--gold); color:var(--ink);}
+  .status-locked{background:var(--ink-soft); color:var(--cream-dim);}
+  .badges-row{display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;}
+  .badge-chip{
+    font-size:22px;
+    background:var(--bg-panel-light);
+    border-radius:50%;
+    width:42px;height:42px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .map-footer{margin-top:26px; text-align:center;}
+  .link-btn{
+    background:none; border:none; color:var(--cream-dim);
+    text-decoration:underline; cursor:pointer; font-size:13px;
+  }
+
+  /* ---------- Round screen ---------- */
+  .round-head{margin-bottom:14px;}
+  .round-head h2{font-family:var(--font-display); margin:0 0 4px; font-size:22px;}
+  .progress-track{
+    height:12px;
+    background:var(--bg-panel);
+    border-radius:999px;
+    overflow:hidden;
+    margin:10px 0;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--teal), var(--gold));
+    border-radius:999px;
+    transition:width .3s ease;
+  }
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+    background:var(--ink); color:var(--cream);
+    padding:12px 20px; border-radius:999px;
+    font-weight:700; font-size:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,.35);
+    opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease;
+    z-index:50; max-width:90vw; text-align:center;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(-4px);}
+
+  .board{display:grid; grid-template-columns:1fr 1.35fr; gap:18px; align-items:start;}
+  @media (max-width:680px){.board{grid-template-columns:1fr;}}
+
+  .col-title{
+    font-family:var(--font-display);
+    font-size:15px;
+    color:var(--gold-light);
+    margin:0 0 10px;
+  }
+
+  .person-card{
+    background:var(--bg-panel);
+    border:3px solid transparent;
+    border-radius:var(--radius);
+    padding:14px;
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition:border-color .15s ease, transform .12s ease;
+  }
+  .person-card:hover{transform:translateY(-2px);}
+  .person-card.selected{border-color:var(--gold); background:var(--bg-panel-light);}
+  .person-card.complete{border-color:var(--teal); opacity:.8;}
+  .person-avatar{
+    font-size:30px;
+    width:52px;height:52px;
+    border-radius:50%;
+    background:var(--bg-panel-light);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .person-name{font-weight:800; font-size:16px; margin:0;}
+  .person-people{margin:2px 0 0; color:var(--cream-dim); font-size:13px;}
+  .dot-row{display:flex; gap:5px; margin-top:6px;}
+  .dot{width:9px;height:9px;border-radius:50%; background:var(--ink-soft);}
+  .dot.filled{background:var(--gold);}
+
+  .attr-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .attr-card{
+    background:var(--bg-panel);
+    border:3px solid transparent;
+    border-radius:var(--radius);
+    padding:12px;
+    cursor:pointer;
+    transition:transform .12s ease, border-color .12s ease, opacity .15s ease;
+    position:relative;
+    min-height:78px;
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .attr-card:hover{transform:translateY(-2px);}
+  .attr-card.matched{
+    border-color:var(--teal);
+    background:var(--bg-panel-light);
+    opacity:.55;
+    cursor:default;
+    transform:none;
+  }
+  .attr-card.wrong{animation:shake .35s ease;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-6px);}
+    75%{transform:translateX(6px);}
+  }
+  .attr-type{
+    position:absolute; top:8px; right:10px;
+    font-size:15px; opacity:.8;
+  }
+  .attr-text{font-weight:700; font-size:14px; padding-right:20px; line-height:1.3;}
+  .attr-play{
+    margin-top:8px;
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    border-radius:999px;
+    padding:6px 12px;
+    font-weight:800;
+    font-size:12px;
+    cursor:pointer;
+    align-self:flex-start;
+    display:flex; align-items:center; gap:5px;
+  }
+  .attr-play:hover{background:var(--gold-light);}
+
+  .hint-box{
+    margin-top:14px;
+    background:var(--bg-panel-light);
+    border-left:4px solid var(--gold);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:14px;
+    color:var(--cream-dim);
+    display:none;
+  }
+  .hint-box.show{display:block;}
+
+  /* ---------- Result screen ---------- */
+  .result-card{
+    background:var(--bg-panel);
+    border-radius:var(--radius);
+    padding:30px 22px;
+    text-align:center;
+    max-width:480px;
+    margin:10px auto 0;
+  }
+  .stars{font-size:40px; letter-spacing:6px; margin:6px 0 14px;}
+  .badge-earned{
+    font-size:60px;
+    width:104px;height:104px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold));
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 12px;
+    box-shadow:0 8px 0 #b5822a;
+  }
+  .result-card h2{font-family:var(--font-display); margin:6px 0; font-size:24px;}
+  .result-score{font-size:15px; color:var(--gold-light); font-weight:800; margin-bottom:14px;}
+  .fact-box{
+    background:var(--bg-panel-light);
+    border-radius:12px;
+    padding:14px 16px;
+    text-align:left;
+    font-size:14px;
+    line-height:1.5;
+    margin-top:16px;
+  }
+  .fact-box b{color:var(--gold-light);}
+
+  /* age-mode simplification for younger players */
+  body.age-young .attr-text{font-size:16px;}
+  body.age-young .attr-card{min-height:90px;}
+  body.age-young .person-name{font-size:18px;}
+  body.age-young .hero-sub, body.age-young .region-card p{font-size:15px;}
+  body.age-young .attr-grid{grid-template-columns:1fr;}
+  body.age-young .full-text{display:none;}
+  body.age-teen .full-text{display:block; font-size:12px; color:var(--cream-dim); margin-top:4px; font-weight:500;}
+
+  .top-actions{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .icon-btn{
+    background:var(--bg-panel);
+    border:none; color:var(--cream);
+    width:38px;height:38px;border-radius:50%;
+    cursor:pointer; font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn:hover{background:var(--bg-panel-light);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- START / AGE SELECT SCREEN -->
+  <section id="screen-start" class="screen active">
+    <div class="hero">
+      <h1 class="hero-title">Мозаика <span>России</span></h1>
+      <div class="stitch" style="max-width:220px;margin:12px auto;"></div>
+      <p class="hero-sub">Отправляйся в путешествие по регионам и знакомься с народами, костюмами, блюдами и говором нашей большой страны.</p>
+    </div>
+    <p style="text-align:center; font-weight:800; margin-top:26px;">Сколько тебе лет?</p>
+    <div class="age-cards">
+      <div class="age-card" data-age="young" tabindex="0" role="button">
+        <span class="emoji">🧸</span>
+        <h3>7–10 лет</h3>
+        <p>Крупные карточки, простые задания</p>
+      </div>
+      <div class="age-card" data-age="teen" tabindex="0" role="button">
+        <span class="emoji">🧭</span>
+        <h3>11–14 лет</h3>
+        <p>Больше фактов, задания сложнее</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP SCREEN -->
+  <section id="screen-map" class="screen">
+    <div class="hero" style="padding-top:6px;">
+      <h1 class="hero-title" style="font-size:clamp(24px,5vw,32px);">Мозаика <span>России</span></h1>
+    </div>
+    <div class="topbar">
+      <h2>Карта путешествия</h2>
+      <div class="stat-pills">
+        <span class="pill">⭐ <span id="map-score">0</span></span>
+        <span class="pill">🗺️ <span id="map-opened">0</span>/<span id="map-total">3</span></span>
+      </div>
+    </div>
+    <div id="badges-row" class="badges-row"></div>
+    <div id="region-list" class="region-list"></div>
+    <div class="map-footer">
+      <button class="link-btn" id="btn-change-age">Сменить возраст</button>
+      &nbsp;·&nbsp;
+      <button class="link-btn" id="btn-reset">Начать заново</button>
+    </div>
+  </section>
+
+  <!-- ROUND SCREEN -->
+  <section id="screen-round" class="screen">
+    <div class="top-actions">
+      <button class="icon-btn" id="btn-back-map" aria-label="Вернуться на карту">←</button>
+      <span class="pill">⭐ <span id="round-score">0</span></span>
+    </div>
+    <div class="round-head">
+      <h2 id="round-title">Регион</h2>
+      <div class="progress-track"><div class="progress-fill" id="round-progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="board">
+      <div>
+        <p class="col-title">Персонажи</p>
+        <div id="person-list"></div>
+      </div>
+      <div>
+        <p class="col-title">Костюм, блюдо и говор — перепутались!</p>
+        <div id="attr-list" class="attr-grid"></div>
+      </div>
+    </div>
+    <div id="hint-box" class="hint-box"></div>
+  </section>
+
+  <!-- RESULT SCREEN -->
+  <section id="screen-result" class="screen">
+    <div class="result-card">
+      <div class="badge-earned" id="result-badge">🏅</div>
+      <h2 id="result-title">Регион пройден!</h2>
+      <div class="stars" id="result-stars">⭐⭐⭐</div>
+      <div class="result-score" id="result-score-text">+30 очков</div>
+      <div class="fact-box">
+        <b>А вы знали?</b>
+        <p id="result-fact" style="margin:6px 0 0;"></p>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-next-region">Играть дальше</button>
+      <button class="btn btn-secondary" id="btn-to-map">Вернуться на карту</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================= DATA ======================= */
+const REGIONS = [
+  {
+    id:'volga', name:'Поволжье', subtitle:'край рек и ремёсел', icon:'🌾', badge:'🧵', badgeName:'Мастер вышивки',
+    peoples:[
+      { id:'tatar', name:'Алсу', group:'татары', avatar:'🧕',
+        costume:{icon:'👗', short:'Калфак и ичиги', full:'Расшитая золотом бархатная шапочка калфак и мягкие кожаные сапожки ичиги с узором.'},
+        dish:{icon:'🍬', short:'Чак-чак', full:'Чак-чак — хрустящие шарики из теста, политые тягучим мёдом.'},
+        phrase:{icon:'💬', short:'«Исәнмесез!»', full:'Так татары вежливо говорят «Здравствуйте!»'},
+        fact:'Слово «чак-чак» переводится примерно как «маленький-маленький» — намёк на крошечные кусочки теста.' },
+      { id:'chuvash', name:'Ильдар', group:'чуваши', avatar:'🧑‍🌾',
+        costume:{icon:'👗', short:'Тухья и белая рубаха', full:'Девичий убор тухья расшит монетками и бисером, а рубаха украшена красной вышивкой-оберегом.'},
+        dish:{icon:'🥧', short:'Хуплу', full:'Хуплу — сытный слоёный пирог с мясом, картофелем и крупой.'},
+        phrase:{icon:'💬', short:'«Сывлăх сунатăп!»', full:'Пожелание здоровья, которым чуваши встречают гостей.'},
+        fact:'Красная нить в чувашской вышивке считалась оберегом от бед — ею украшали ворот и рукава рубахи.' },
+      { id:'mordva', name:'Вежай', group:'мордва (эрзя)', avatar:'👦',
+        costume:{icon:'👗', short:'Панго и панар', full:'Высокий берестяной убор панго и белая рубаха панар с узором из красной и чёрной шерсти.'},
+        dish:{icon:'🥣', short:'Пшённая каша с тыквой', full:'Сытное традиционное блюдо мордовской кухни, которое готовили на большие праздники.'},
+        phrase:{icon:'💬', short:'«Шумбрат!»', full:'Приветствие «Здравствуй!» на эрзянском языке.'},
+        fact:'Мордва — это два родственных народа, эрзя и мокша, и у каждого свой язык и свои узоры в вышивке.' },
+    ]
+  },
+  {
+    id:'kavkaz', name:'Северный Кавказ', subtitle:'горы и гостеприимство', icon:'🏔️', badge:'🏔️', badgeName:'Хранитель гор',
+    peoples:[
+      { id:'osetin', name:'Аслан', group:'осетины', avatar:'🧑‍🦱',
+        costume:{icon:'👗', short:'Черкеска и папаха', full:'Черкеска с газырями для патронов на груди и высокая мохнатая папаха — костюм горца-всадника.'},
+        dish:{icon:'🥧', short:'Осетинский пирог', full:'Тонкий круглый пирог с сыром — три пирога на столе означают солнце, землю и веру.'},
+        phrase:{icon:'💬', short:'«Фæндараст!»', full:'Тёплое пожелание счастливого пути на прощание.'},
+        fact:'На осетинский праздничный стол всегда ставят три пирога — не два и не четыре, число особое.' },
+      { id:'kabardin', name:'Заур', group:'кабардинцы', avatar:'🧑',
+        costume:{icon:'👗', short:'Черкеска наездника', full:'Приталенная черкеска с узкими рукавами и каракулевая шапка — костюм искусного наездника.'},
+        dish:{icon:'🍗', short:'Гедлибже', full:'Курица в мягком сметанном соусе с чесноком — любимое блюдо кабардинской кухни.'},
+        phrase:{icon:'💬', short:'«Ассаламу алейкум!»', full:'Приветствие «Мир вам!», распространённое у многих кавказских народов.'},
+        fact:'Кабардинцы издавна славились как искусные наездники, а кабардинская порода лошадей ценилась далеко за пределами Кавказа.' },
+      { id:'balkar', name:'Фатима', group:'балкарцы', avatar:'👧',
+        costume:{icon:'👗', short:'Расшитый бешмет', full:'Тёплый бешмет из шерсти с узорной тесьмой и высокая шапка из овчины.'},
+        dish:{icon:'🥙', short:'Хычины', full:'Тонкие лепёшки с начинкой из картофеля и сыра, обжаренные на сухой сковороде.'},
+        phrase:{icon:'💬', short:'«Сау къал!»', full:'Тёплое пожелание «Оставайся здоровым!» на прощание.'},
+        fact:'Балкарцы живут высоко в горах Кавказа, и хычины пекли, чтобы взять с собой в дальний путь по перевалам.' },
+    ]
+  },
+  {
+    id:'sibir', name:'Сибирь', subtitle:'тайга, снег и оленьи упряжки', icon:'❄️', badge:'❄️', badgeName:'Друг тайги',
+    peoples:[
+      { id:'buryat', name:'Баир', group:'буряты', avatar:'🧑‍🦲',
+        costume:{icon:'👗', short:'Дэгэл с кушаком', full:'Дэгэл — запашной халат с ярким шёлковым кушаком, знаком принадлежности к своему роду.'},
+        dish:{icon:'🥟', short:'Буузы', full:'Сочные паровые манты с бараниной, которые едят руками, надкусывая с краю.'},
+        phrase:{icon:'💬', short:'«Сайн байна!»', full:'Обычное бурятское приветствие «Здравствуйте, как дела?»'},
+        fact:'У буузов специально оставляют дырочку сверху, чтобы выпустить пар и не обжечься горячим соком.' },
+      { id:'yakut', name:'Айталина', group:'якуты (саха)', avatar:'👧',
+        costume:{icon:'👗', short:'Шуба сон с серебром', full:'Меховая шуба сон, расшитая серебряными бляшками — украшение и защита от лютого мороза.'},
+        dish:{icon:'🐟', short:'Строганина', full:'Тонко наструганная замороженная рыба, которую едят прямо со льда.'},
+        phrase:{icon:'💬', short:'«Дорообо!»', full:'Якутское приветствие «Здравствуйте!»'},
+        fact:'В Якутии зимой бывают морозы за −50°C — там расположен один из самых холодных обитаемых уголков планеты.' },
+      { id:'tuvan', name:'Чингиз', group:'тувинцы', avatar:'🧑‍🌾',
+        costume:{icon:'👗', short:'Тон с широким поясом', full:'Тон — тёплый халат внахлёст с длинными рукавами и широким поясом-кушаком.'},
+        dish:{icon:'🍵', short:'Сүттüг шай', full:'Солёный чай с молоком, который тувинцы пьют по многу раз в день.'},
+        phrase:{icon:'💬', short:'«Экии!»', full:'Тувинское приветствие «Здравствуйте!»'},
+        fact:'Тувинцы знамениты горловым пением хоомей — один певец может исполнять сразу два-три звука одновременно.' },
+    ]
+  },
+];
+
+/* ======================= STATE ======================= */
+const STORAGE_KEY = 'mosaicaRossii_v1';
+let state = loadState();
+
+function defaultState(){
+  return { ageMode:null, score:0, progress:{}, badges:[] };
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed);
+  }catch(e){ return defaultState(); }
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/* ======================= NAVIGATION ======================= */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ======================= TOAST ======================= */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ======================= AGE SELECT ======================= */
+document.querySelectorAll('.age-card').forEach(card=>{
+  function pick(){
+    state.ageMode = card.dataset.age;
+    saveState();
+    applyAgeClass();
+    renderMap();
+    showScreen('screen-map');
+  }
+  card.addEventListener('click', pick);
+  card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); }});
+});
+function applyAgeClass(){
+  document.body.classList.remove('age-young','age-teen');
+  document.body.classList.add(state.ageMode==='young' ? 'age-young' : 'age-teen');
+}
+
+document.getElementById('btn-change-age').addEventListener('click', ()=>{
+  showScreen('screen-start');
+});
+document.getElementById('btn-reset').addEventListener('click', ()=>{
+  if(confirm('Сбросить весь прогресс и очки?')){
+    state = defaultState();
+    saveState();
+    showScreen('screen-start');
+  }
+});
+
+/* ======================= MAP SCREEN ======================= */
+function regionStatus(index){
+  const r = REGIONS[index];
+  if(state.progress[r.id] && state.progress[r.id].completed) return 'done';
+  if(index===0) return 'open';
+  const prev = REGIONS[index-1];
+  return (state.progress[prev.id] && state.progress[prev.id].completed) ? 'open' : 'locked';
+}
+
+function renderMap(){
+  document.getElementById('map-score').textContent = state.score;
+  const openedCount = REGIONS.filter(r=> state.progress[r.id] && state.progress[r.id].completed).length;
+  document.getElementById('map-opened').textContent = openedCount;
+  document.getElementById('map-total').textContent = REGIONS.length;
+
+  const badgesRow = document.getElementById('badges-row');
+  badgesRow.innerHTML = '';
+  state.badges.forEach(bid=>{
+    const region = REGIONS.find(r=>r.id===bid);
+    if(!region) return;
+    const chip = document.createElement('div');
+    chip.className='badge-chip';
+    chip.title = region.badgeName;
+    chip.textContent = region.badge;
+    badgesRow.appendChild(chip);
+  });
+
+  const list = document.getElementById('region-list');
+  list.innerHTML = '';
+  REGIONS.forEach((r, idx)=>{
+    const status = regionStatus(idx);
+    const card = document.createElement('button');
+    card.className = 'region-card' + (status==='locked' ? ' locked' : '');
+    card.disabled = status==='locked';
+    const statusLabel = status==='done' ? '<span class="status-tag status-done">Пройден ✓</span>'
+      : status==='open' ? '<span class="status-tag status-open">Доступен</span>'
+      : '<span class="status-tag status-locked">🔒 Закрыт</span>';
+    const starsText = (state.progress[r.id] && state.progress[r.id].stars)
+      ? '⭐'.repeat(state.progress[r.id].stars) : '';
+    card.innerHTML = `
+      <div class="r-icon">${r.icon}</div>
+      <div class="r-body">
+        <h3>${r.name}</h3>
+        <p>${r.subtitle} · ${r.peoples.length} народа ${starsText}</p>
+      </div>
+      ${statusLabel}
+    `;
+    if(status!=='locked'){
+      card.addEventListener('click', ()=> startRegion(r.id));
+    }
+    list.appendChild(card);
+  });
+}
+
+/* ======================= ROUND SCREEN ======================= */
+let round = null; // { regionId, persons:[...], attrs:[...], selectedPersonId, mistakes, matchedCount }
+
+function startRegion(regionId){
+  const region = REGIONS.find(r=>r.id===regionId);
+  const attrTypes = ['costume','dish','phrase'];
+  let attrs = [];
+  region.peoples.forEach(p=>{
+    attrTypes.forEach(t=>{
+      attrs.push({ personId:p.id, type:t, data:p[t] });
+    });
+  });
+  attrs = shuffle(attrs);
+
+  round = {
+    regionId,
+    mistakes:0,
+    matchedCount:0,
+    totalCount: region.peoples.length * 3,
+    selectedPersonId:null,
+    matchedMap:{} // personId -> {costume:bool, dish:bool, phrase:bool}
+  };
+  region.peoples.forEach(p=> round.matchedMap[p.id] = {costume:false, dish:false, phrase:false});
+
+  document.getElementById('round-title').textContent = region.icon + ' ' + region.name;
+  document.getElementById('round-score').textContent = state.score;
+  renderPersons(region);
+  renderAttrs(region, attrs);
+  updateProgressBar();
+  hideHint();
+  showScreen('screen-round');
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function renderPersons(region){
+  const list = document.getElementById('person-list');
+  list.innerHTML = '';
+  region.peoples.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'person-card';
+    card.dataset.personId = p.id;
+    card.tabIndex = 0;
+    card.setAttribute('role','button');
+    card.innerHTML = `
+      <div class="person-avatar">${p.avatar}</div>
+      <div style="flex:1">
+        <p class="person-name">${p.name}</p>
+        <p class="person-people">${p.group}</p>
+        <div class="dot-row">
+          <span class="dot" data-type="costume"></span>
+          <span class="dot" data-type="dish"></span>
+          <span class="dot" data-type="phrase"></span>
+        </div>
+      </div>
+    `;
+    function select(){
+      if(isPersonComplete(p.id)) return;
+      round.selectedPersonId = p.id;
+      refreshPersonSelection();
+    }
+    card.addEventListener('click', select);
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(); }});
+    list.appendChild(card);
+  });
+}
+
+function isPersonComplete(personId){
+  const m = round.matchedMap[personId];
+  return m.costume && m.dish && m.phrase;
+}
+
+function refreshPersonSelection(){
+  document.querySelectorAll('.person-card').forEach(card=>{
+    const pid = card.dataset.personId;
+    card.classList.toggle('selected', pid===round.selectedPersonId);
+    card.classList.toggle('complete', isPersonComplete(pid));
+    const m = round.matchedMap[pid];
+    card.querySelectorAll('.dot').forEach(dot=>{
+      dot.classList.toggle('filled', !!m[dot.dataset.type]);
+    });
+  });
+}
+
+function renderAttrs(region, attrs){
+  const list = document.getElementById('attr-list');
+  list.innerHTML = '';
+  const typeIcon = {costume:'👗', dish:'🍽️', phrase:'💬'};
+  attrs.forEach((a, i)=>{
+    const card = document.createElement('div');
+    card.className = 'attr-card';
+    card.dataset.personId = a.personId;
+    card.dataset.type = a.type;
+    card.tabIndex = 0;
+    card.setAttribute('role','button');
+    let playBtn = '';
+    if(a.type==='phrase'){
+      playBtn = `<button type="button" class="attr-play" data-say="${a.data.short.replace(/[«»]/g,'')}">🔊 Слушать</button>`;
+    }
+    card.innerHTML = `
+      <span class="attr-type">${typeIcon[a.type]}</span>
+      <span class="attr-text">${a.data.short}</span>
+      <span class="full-text">${a.data.full}</span>
+      ${playBtn}
+    `;
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.attr-play')) return;
+      handleAttrClick(card, a);
+    });
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); handleAttrClick(card, a); }});
+    list.appendChild(card);
+  });
+  list.querySelectorAll('.attr-play').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      speak(btn.dataset.say);
+    });
+  });
+}
+
+function speak(text){
+  if(!('speechSynthesis' in window)) { showToast('Озвучка недоступна в этом браузере'); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ru-RU';
+  u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+function handleAttrClick(card, a){
+  if(card.classList.contains('matched')) return;
+  if(!round.selectedPersonId){
+    showToast('Сначала выбери персонажа слева 👆');
+    return;
+  }
+  const selectedId = round.selectedPersonId;
+  const alreadyDone = round.matchedMap[selectedId][a.type];
+  if(alreadyDone){
+    showToast('Этот вид уже найден для этого персонажа');
+    return;
+  }
+  if(a.personId === selectedId){
+    // correct
+    card.classList.add('matched');
+    round.matchedMap[selectedId][a.type] = true;
+    round.matchedCount++;
+    state.score += 10;
+    document.getElementById('round-score').textContent = state.score;
+    hideHint();
+    refreshPersonSelection();
+    updateProgressBar();
+    if(isPersonComplete(selectedId)){
+      round.selectedPersonId = null;
+      const region = REGIONS.find(r=>r.id===round.regionId);
+      const nextPerson = region.peoples.find(p=>!isPersonComplete(p.id));
+      if(nextPerson) round.selectedPersonId = nextPerson.id;
+      refreshPersonSelection();
+    }
+    if(round.matchedCount >= round.totalCount){
+      setTimeout(finishRound, 500);
+    }
+  } else {
+    round.mistakes++;
+    card.classList.add('wrong');
+    setTimeout(()=>card.classList.remove('wrong'), 350);
+    const region = REGIONS.find(r=>r.id===round.regionId);
+    const person = region.peoples.find(p=>p.id===selectedId);
+    showHint(`Хм, это не про ${person.name}. Попробуй другую карточку! 💡`);
+  }
+}
+
+function showHint(msg){
+  const box = document.getElementById('hint-box');
+  box.textContent = msg;
+  box.classList.add('show');
+}
+function hideHint(){
+  document.getElementById('hint-box').classList.remove('show');
+}
+
+function updateProgressBar(){
+  const pct = Math.round((round.matchedCount / round.totalCount) * 100);
+  document.getElementById('round-progress-fill').style.width = pct + '%';
+}
+
+document.getElementById('btn-back-map').addEventListener('click', ()=>{
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  saveState();
+  renderMap();
+  showScreen('screen-map');
+});
+
+/* ======================= RESULT SCREEN ======================= */
+function finishRound(){
+  const region = REGIONS.find(r=>r.id===round.regionId);
+  let stars = 3;
+  if(round.mistakes>=6) stars=1;
+  else if(round.mistakes>=3) stars=2;
+
+  const wasCompleted = !!(state.progress[region.id] && state.progress[region.id].completed);
+  const prevStars = (state.progress[region.id] && state.progress[region.id].stars) || 0;
+  state.progress[region.id] = { completed:true, stars: Math.max(stars, prevStars) };
+
+  let earnedBadge = false;
+  if(!state.badges.includes(region.id)){
+    state.badges.push(region.id);
+    earnedBadge = true;
+  }
+  saveState();
+
+  document.getElementById('result-badge').textContent = region.badge;
+  document.getElementById('result-title').textContent = wasCompleted ? 'Регион пройден снова!' : `Регион «${region.name}» пройден!`;
+  document.getElementById('result-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
+  document.getElementById('result-score-text').textContent = earnedBadge
+    ? `Всего очков: ${state.score} · получен значок «${region.badgeName}»`
+    : `Всего очков: ${state.score}`;
+
+  const randomPerson = region.peoples[Math.floor(Math.random()*region.peoples.length)];
+  document.getElementById('result-fact').textContent = randomPerson.fact;
+
+  const idx = REGIONS.findIndex(r=>r.id===region.id);
+  const nextRegion = REGIONS[idx+1];
+  const nextBtn = document.getElementById('btn-next-region');
+  if(nextRegion){
+    nextBtn.style.display = 'inline-block';
+    nextBtn.textContent = 'Играть дальше';
+    nextBtn.onclick = ()=> startRegion(nextRegion.id);
+  } else {
+    nextBtn.style.display = 'none';
+  }
+
+  showScreen('screen-result');
+}
+
+document.getElementById('btn-to-map').addEventListener('click', ()=>{
+  renderMap();
+  showScreen('screen-map');
+});
+
+/* ======================= INIT ======================= */
+function init(){
+  if(state.ageMode){
+    applyAgeClass();
+    renderMap();
+    showScreen('screen-map');
+  } else {
+    showScreen('screen-start');
+  }
+}
+init();
+</script>
+</body>
+</html>

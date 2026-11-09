@@ -1,0 +1,1686 @@
+
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Мозаика России</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', 'Arial', system-ui, sans-serif;
+            background: #fcf6ed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            margin: 0;
+        }
+        /* ===== MAIN CONTAINER ===== */
+        #app {
+            max-width: 1200px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 20px 60px rgba(120, 60, 30, 0.15);
+            padding: 24px 28px 32px;
+            position: relative;
+            min-height: 600px;
+            transition: all 0.3s;
+            border: 2px solid #e8dccc;
+        }
+        @media (max-width: 700px) {
+            #app {
+                padding: 16px 14px 20px;
+                border-radius: 28px;
+                min-height: 90vh;
+            }
+        }
+
+        /* ===== TYPOGRAPHY ===== */
+        h1,
+        h2,
+        h3 {
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+        .title-main {
+            font-size: 2rem;
+            background: linear-gradient(145deg, #8b1a1a, #c0392b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+        }
+        .title-sub {
+            color: #5d4037;
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .mb-12 {
+            margin-bottom: 12px;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #ece3d8;
+            color: #3e2c1b;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            text-decoration: none;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+        }
+        .btn:active {
+            transform: translateY(0px);
+        }
+        .btn-primary {
+            background: #8b1a1a;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(139, 26, 26, 0.30);
+        }
+        .btn-primary:hover {
+            background: #a02020;
+        }
+        .btn-gold {
+            background: #d4a44a;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(212, 164, 74, 0.35);
+        }
+        .btn-gold:hover {
+            background: #c4943a;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #8b1a1a;
+            color: #8b1a1a;
+        }
+        .btn-outline:hover {
+            background: #8b1a1a10;
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 0.85rem;
+        }
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0e8de;
+            margin-bottom: 20px;
+        }
+        .app-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #3e2c1b;
+        }
+        .app-header .brand span {
+            font-size: 1.8rem;
+        }
+        .app-header .stats {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-weight: 600;
+            color: #5d4037;
+            flex-wrap: wrap;
+        }
+        .app-header .stats .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #f5efe8;
+            padding: 4px 14px 4px 10px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+        }
+        .app-header .stats .stat-item .icon {
+            font-size: 1.2rem;
+        }
+        .level-toggle {
+            display: flex;
+            gap: 4px;
+            background: #f0e8de;
+            border-radius: 40px;
+            padding: 3px;
+        }
+        .level-toggle .btn-lvl {
+            padding: 4px 14px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            background: transparent;
+            color: #5d4037;
+            transition: 0.2s;
+        }
+        .level-toggle .btn-lvl.active {
+            background: #8b1a1a;
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(139, 26, 26, 0.25);
+        }
+        .level-toggle .btn-lvl:hover:not(.active) {
+            background: #ddd0c0;
+        }
+        @media (max-width: 550px) {
+            .app-header .brand {
+                font-size: 1.2rem;
+            }
+            .app-header .stats .stat-item {
+                font-size: 0.8rem;
+                padding: 2px 10px 2px 6px;
+            }
+            .app-header .stats {
+                gap: 8px;
+            }
+        }
+
+        /* ===== MAP SCREEN ===== */
+        #mapScreen .map-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-top: 12px;
+        }
+        .region-card {
+            background: #fcf8f2;
+            border-radius: 28px;
+            padding: 20px 16px 18px;
+            text-align: center;
+            border: 2px solid #e8dccc;
+            transition: all 0.25s;
+            cursor: default;
+            position: relative;
+            min-height: 170px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .region-card .region-icon {
+            font-size: 3.2rem;
+            margin-bottom: 4px;
+        }
+        .region-card .region-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #3e2c1b;
+        }
+        .region-card .region-sub {
+            font-size: 0.85rem;
+            color: #8a7a6a;
+            margin-top: 2px;
+        }
+        .region-card .region-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 16px;
+            border-radius: 30px;
+            background: #e8dccc;
+            color: #5d4037;
+        }
+        .region-card .region-status.locked {
+            background: #e8e0d8;
+            color: #a09080;
+        }
+        .region-card .region-status.done {
+            background: #c8e0c8;
+            color: #2d6a2d;
+        }
+        .region-card .region-status.available {
+            background: #d4a44a;
+            color: #fff;
+        }
+        .region-card.locked {
+            opacity: 0.6;
+            filter: grayscale(0.4);
+        }
+        .region-card.available {
+            border-color: #d4a44a;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(212, 164, 74, 0.20);
+        }
+        .region-card.available:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 28px rgba(212, 164, 74, 0.30);
+        }
+        .region-card.done {
+            border-color: #7dbd7d;
+            background: #f4fcf4;
+        }
+        .region-card .badge-collect {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+            animation: badgePop 0.6s ease;
+        }
+        @keyframes badgePop {
+            0% {
+                transform: scale(0) rotate(-20deg);
+            }
+            60% {
+                transform: scale(1.3) rotate(8deg);
+            }
+            100% {
+                transform: scale(1) rotate(0);
+            }
+        }
+        .map-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 20px;
+            color: #8a7a6a;
+            font-size: 1.1rem;
+        }
+        .progress-bar-wrap {
+            margin: 12px 0 6px;
+            background: #ede5db;
+            border-radius: 40px;
+            height: 10px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+        }
+        .progress-bar-wrap .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d4a44a, #c0392b);
+            border-radius: 40px;
+            transition: width 0.6s ease;
+            width: 0%;
+        }
+
+        /* ===== GAME SCREEN ===== */
+        #gameScreen .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin-bottom: 16px;
+        }
+        #gameScreen .game-header .region-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3e2c1b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #gameScreen .game-header .game-progress {
+            font-weight: 600;
+            color: #5d4037;
+            background: #f5efe8;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+        }
+        .game-board {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            margin-top: 8px;
+            min-height: 380px;
+            position: relative;
+        }
+        @media (max-width: 820px) {
+            .game-board {
+                flex-direction: column;
+                gap: 18px;
+            }
+        }
+
+        /* Left: Character cards */
+        .characters-area {
+            flex: 0 0 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        @media (max-width: 820px) {
+            .characters-area {
+                flex: 1 1 auto;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+        .char-card {
+            background: #fcf8f2;
+            border-radius: 24px;
+            padding: 14px 16px;
+            border: 3px solid #e8dccc;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 76px;
+            position: relative;
+            cursor: default;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        .char-card .avatar {
+            font-size: 2.4rem;
+            flex-shrink: 0;
+            width: 48px;
+            text-align: center;
+        }
+        .char-card .char-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .char-card .char-info .name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #3e2c1b;
+        }
+        .char-card .char-info .people {
+            font-size: 0.85rem;
+            color: #8a7a6a;
+        }
+        .char-card .char-slots {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .char-card .char-slots .slot {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: #f0e8de;
+            border: 2px dashed #d5c8b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: 0.2s;
+            position: relative;
+        }
+        .char-card .char-slots .slot.filled {
+            border: 2px solid #7dbd7d;
+            background: #e8f4e8;
+            animation: slotFill 0.3s ease;
+        }
+        @keyframes slotFill {
+            0% {
+                transform: scale(0.6);
+            }
+            60% {
+                transform: scale(1.15);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .char-card.complete {
+            border-color: #7dbd7d;
+            background: #f4fcf4;
+            box-shadow: 0 0 0 4px #7dbd7d30;
+        }
+        .char-card.drag-over {
+            border-color: #d4a44a;
+            background: #fcf4e8;
+            transform: scale(1.02);
+        }
+        .char-card .check-mark {
+            position: absolute;
+            top: -8px;
+            right: -6px;
+            font-size: 1.6rem;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.10));
+        }
+        @media (max-width: 550px) {
+            .char-card .avatar {
+                font-size: 1.8rem;
+                width: 36px;
+            }
+            .char-card .char-info .name {
+                font-size: 0.9rem;
+            }
+            .char-card .char-slots .slot {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Right: Attribute cards */
+        .attributes-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .attributes-area .attr-label {
+            font-weight: 600;
+            color: #5d4037;
+            font-size: 0.9rem;
+            padding-left: 4px;
+        }
+        .attr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+        }
+        .attr-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 12px 8px 10px;
+            border: 2px solid #e8dccc;
+            text-align: center;
+            cursor: grab;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            touch-action: none;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-height: 86px;
+            justify-content: center;
+        }
+        .attr-card .attr-emoji {
+            font-size: 2rem;
+            line-height: 1.2;
+        }
+        .attr-card .attr-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #3e2c1b;
+            line-height: 1.2;
+        }
+        .attr-card .attr-desc {
+            font-size: 0.7rem;
+            color: #8a7a6a;
+            line-height: 1.2;
+            display: none;
+        }
+        .attr-card:hover:not(.matched) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+            border-color: #d4a44a;
+        }
+        .attr-card:active {
+            cursor: grabbing;
+        }
+        .attr-card.matched {
+            opacity: 0.3;
+            transform: scale(0.92);
+            pointer-events: none;
+            border-color: #b0b0b0;
+            filter: grayscale(0.3);
+        }
+        .attr-card.selected {
+            border-color: #8b1a1a;
+            background: #fcf0ec;
+            box-shadow: 0 0 0 4px #8b1a1a20;
+            transform: scale(1.04);
+        }
+        .attr-card.wrong {
+            animation: shake 0.4s ease;
+            border-color: #e67e22;
+        }
+        .attr-card .attr-type-tag {
+            font-size: 0.6rem;
+            background: #ede5db;
+            padding: 1px 10px;
+            border-radius: 20px;
+            color: #5d4037;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-10px);
+            }
+            40% {
+                transform: translateX(10px);
+            }
+            60% {
+                transform: translateX(-6px);
+            }
+            80% {
+                transform: translateX(6px);
+            }
+        }
+        @media (max-width: 550px) {
+            .attr-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 8px;
+            }
+            .attr-card {
+                min-height: 70px;
+                padding: 8px 4px;
+            }
+            .attr-card .attr-emoji {
+                font-size: 1.5rem;
+            }
+            .attr-card .attr-name {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* ===== FEEDBACK BAR ===== */
+        .feedback-bar {
+            margin-top: 16px;
+            padding: 10px 18px;
+            border-radius: 30px;
+            background: #f5efe8;
+            font-weight: 500;
+            color: #3e2c1b;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            transition: 0.3s;
+            border-left: 4px solid #d4a44a;
+        }
+        .feedback-bar .fb-icon {
+            font-size: 1.4rem;
+        }
+        .feedback-bar .fb-text {
+            flex: 1;
+        }
+        .feedback-bar.success {
+            border-left-color: #7dbd7d;
+            background: #f0faf0;
+        }
+        .feedback-bar.hint {
+            border-left-color: #e67e22;
+            background: #fcf4e8;
+        }
+
+        /* ===== RESULT SCREEN ===== */
+        #resultScreen {
+            text-align: center;
+            padding: 20px 10px 10px;
+        }
+        #resultScreen .result-icon {
+            font-size: 4rem;
+            margin-bottom: 4px;
+        }
+        #resultScreen .result-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3e2c1b;
+        }
+        #resultScreen .result-score {
+            font-size: 1.3rem;
+            color: #5d4037;
+            margin: 6px 0;
+        }
+        #resultScreen .result-stars {
+            font-size: 2.4rem;
+            margin: 6px 0;
+            letter-spacing: 6px;
+        }
+        #resultScreen .result-badge {
+            font-size: 4.5rem;
+            margin: 10px 0 6px;
+            animation: badgePop 0.8s ease;
+            display: inline-block;
+        }
+        #resultScreen .result-fact {
+            background: #fcf4e8;
+            border-radius: 24px;
+            padding: 16px 24px;
+            max-width: 500px;
+            margin: 12px auto;
+            font-size: 1.05rem;
+            color: #3e2c1b;
+            border-left: 4px solid #d4a44a;
+            text-align: left;
+            line-height: 1.5;
+        }
+        #resultScreen .result-fact .fact-label {
+            font-weight: 700;
+            color: #8b1a1a;
+        }
+        #resultScreen .result-actions {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        /* ===== COLLECTION OVERLAY ===== */
+        .collection-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 24px;
+        }
+        .collection-overlay.open {
+            display: flex;
+        }
+        .collection-panel {
+            background: #fff;
+            border-radius: 40px;
+            max-width: 520px;
+            width: 100%;
+            padding: 32px 28px 28px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.30);
+            animation: modalIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes modalIn {
+            0% {
+                transform: scale(0.92) translateY(20px);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+        .collection-panel h2 {
+            font-size: 1.6rem;
+            color: #3e2c1b;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .collection-panel .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 12px;
+            margin: 12px 0 18px;
+        }
+        .collection-panel .badge-item {
+            text-align: center;
+            padding: 12px 4px;
+            border-radius: 20px;
+            background: #fcf8f2;
+            border: 2px solid #e8dccc;
+        }
+        .collection-panel .badge-item .b-icon {
+            font-size: 2.6rem;
+        }
+        .collection-panel .badge-item .b-name {
+            font-size: 0.7rem;
+            color: #5d4037;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .collection-panel .badge-item.locked-badge {
+            opacity: 0.35;
+            filter: grayscale(0.6);
+        }
+        .collection-panel .close-collect {
+            display: block;
+            margin: 6px auto 0;
+        }
+
+        /* ===== UTILITY ===== */
+        .hidden {
+            display: none !important;
+        }
+        .flex-gap {
+            gap: 10px;
+        }
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+
+        /* ===== RESPONSIVE FINE-TUNE ===== */
+        @media (max-width: 480px) {
+            .app-header .brand {
+                font-size: 1rem;
+            }
+            .app-header .brand span {
+                font-size: 1.2rem;
+            }
+            .app-header .stats .stat-item {
+                font-size: 0.7rem;
+                padding: 2px 8px 2px 4px;
+            }
+            .title-main {
+                font-size: 1.3rem;
+            }
+            .region-card .region-icon {
+                font-size: 2.4rem;
+            }
+            .region-card .region-name {
+                font-size: 1rem;
+            }
+            .char-card {
+                min-height: 60px;
+                padding: 10px 12px;
+            }
+            .char-card .char-info .name {
+                font-size: 0.8rem;
+            }
+            .char-card .char-slots .slot {
+                width: 24px;
+                height: 24px;
+                font-size: 0.75rem;
+            }
+            .attr-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+                gap: 6px;
+            }
+            .attr-card {
+                min-height: 60px;
+                padding: 6px 2px;
+            }
+            .attr-card .attr-emoji {
+                font-size: 1.2rem;
+            }
+            .attr-card .attr-name {
+                font-size: 0.6rem;
+            }
+            .feedback-bar {
+                font-size: 0.85rem;
+                padding: 8px 14px;
+                min-height: 40px;
+            }
+            .btn {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+            #resultScreen .result-title {
+                font-size: 1.4rem;
+            }
+            #resultScreen .result-icon {
+                font-size: 3rem;
+            }
+            #resultScreen .result-badge {
+                font-size: 3.2rem;
+            }
+            .collection-panel {
+                padding: 20px 16px;
+            }
+        }
+
+        /* Scrollbar style */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0e8de;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4a44a;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- ===== HEADER ===== -->
+        <header class="app-header">
+            <div class="brand">
+                <span>🧩</span>
+                <span class="title-main">Мозаика</span>
+                <span class="title-sub">России</span>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="icon">⭐</span>
+                    <span id="totalScore">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="icon">🏆</span>
+                    <span id="totalBadges">0 / 3</span>
+                </div>
+                <div class="level-toggle">
+                    <button class="btn-lvl active" data-level="easy" id="lvlEasy">7–10 лет</button>
+                    <button class="btn-lvl" data-level="hard" id="lvlHard">11–14 лет</button>
+                </div>
+                <button class="btn btn-sm btn-outline" id="showCollectionBtn" title="Коллекция">🎖️</button>
+            </div>
+        </header>
+
+        <!-- ===== MAP SCREEN ===== -->
+        <div id="mapScreen">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <h2 style="color:#3e2c1b; font-size:1.3rem;">🗺️ Карта путешествия</h2>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span style="font-weight:500; color:#5d4037; font-size:0.9rem;">Прогресс</span>
+                    <div class="progress-bar-wrap">
+                        <div class="fill" id="progressFill" style="width:0%;"></div>
+                    </div>
+                    <span style="font-weight:600; color:#5d4037; font-size:0.85rem;" id="progressText">0 / 3</span>
+                </div>
+            </div>
+            <div class="map-grid" id="mapGrid"></div>
+            <div style="margin-top:20px; text-align:center; font-size:0.9rem; color:#8a7a6a;">
+                💡 Пройди все регионы и собери полную коллекцию!
+            </div>
+        </div>
+
+        <!-- ===== GAME SCREEN ===== -->
+        <div id="gameScreen" class="hidden">
+            <div class="game-header">
+                <div class="region-title">
+                    <span id="gameRegionIcon">🌍</span>
+                    <span id="gameRegionName">Регион</span>
+                </div>
+                <div class="game-progress">
+                    <span id="gameMatchCount">0</span> / <span id="gameTotalMatches">9</span> совпадений
+                </div>
+                <button class="btn btn-sm btn-outline" id="backToMapBtn">← На карту</button>
+            </div>
+
+            <div class="game-board">
+                <!-- Left: Characters -->
+                <div class="characters-area" id="charactersArea"></div>
+                <!-- Right: Attributes -->
+                <div class="attributes-area">
+                    <div class="attr-label">🔄 Сопоставь с народом:</div>
+                    <div class="attr-grid" id="attrGrid"></div>
+                </div>
+            </div>
+
+            <!-- Feedback -->
+            <div class="feedback-bar" id="feedbackBar">
+                <span class="fb-icon">💡</span>
+                <span class="fb-text" id="feedbackText">Выбери атрибут, затем нажми на народ, или перетащи.</span>
+            </div>
+        </div>
+
+        <!-- ===== RESULT SCREEN ===== -->
+        <div id="resultScreen" class="hidden">
+            <div class="result-icon" id="resultIcon">🎉</div>
+            <div class="result-title" id="resultTitle">Отлично!</div>
+            <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+            <div class="result-score" id="resultScore">+15 очков</div>
+            <div class="result-badge" id="resultBadge">🏅</div>
+            <div style="font-weight:600; color:#5d4037; margin-top:2px;" id="resultBadgeLabel">Значок получен!</div>
+            <div class="result-fact" id="resultFact">
+                <span class="fact-label">📖 А вы знали, что…</span>
+                <span id="factText">—</span>
+            </div>
+            <div class="result-actions">
+                <button class="btn btn-primary" id="resultContinueBtn">▶ Играть дальше</button>
+                <button class="btn btn-outline" id="resultMapBtn">🗺️ На карту</button>
+            </div>
+        </div>
+
+        <!-- ===== COLLECTION OVERLAY ===== -->
+        <div class="collection-overlay" id="collectionOverlay">
+            <div class="collection-panel">
+                <h2>🎖️ Моя коллекция</h2>
+                <div class="badge-grid" id="collectionGrid"></div>
+                <button class="btn btn-gold close-collect" id="closeCollectionBtn">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  DATA
+        // ============================================================
+        const GAME_DATA = {
+            regions: [{
+                id: 'north',
+                name: 'Северный',
+                icon: '❄️',
+                description: 'Народы Севера',
+                badge: '❄️',
+                fact: 'Чукчи умеют строить жилища из снега — иглу, а также разводят оленей и занимаются морским промыслом.',
+                peoples: [{
+                    id: 'chukchi',
+                    name: 'Чукчи',
+                    avatar: '🧊',
+                    costume: { emoji: '🧥', label: 'Кухлянка', desc: 'Тёплая меховая одежда из оленьего меха' },
+                    dish: { emoji: '🐟', label: 'Строганина', desc: 'Замороженная рыба, нарезанная стружкой' },
+                    speech: { emoji: '🗣️', label: 'Экээк!', desc: 'Приветствие на чукотском языке' }
+                }, {
+                    id: 'nenets',
+                    name: 'Ненцы',
+                    avatar: '🦌',
+                    costume: { emoji: '🧥', label: 'Малица', desc: 'Глухая меховая одежда с капюшоном' },
+                    dish: { emoji: '🌿', label: 'Ягель', desc: 'Лишайник, которым кормят оленей' },
+                    speech: { emoji: '🗣️', label: 'Тяр!', desc: 'Возглас на ненецком языке' }
+                }, {
+                    id: 'yakuts',
+                    name: 'Якуты',
+                    avatar: '🐴',
+                    costume: { emoji: '🧥', label: 'Сон', desc: 'Традиционная якутская одежда с орнаментом' },
+                    dish: { emoji: '🍖', label: 'Омуль', desc: 'Рыба, которую коптят и подают с травами' },
+                    speech: { emoji: '🗣️', label: 'Барыла!', desc: 'Приветствие на якутском языке' }
+                }]
+            }, {
+                id: 'caucasus',
+                name: 'Кавказский',
+                icon: '⛰️',
+                description: 'Народы Кавказа',
+                badge: '⛰️',
+                fact: 'На Кавказе проживает более 50 народностей. Гостеприимство у народов Кавказа — важнейшая традиция.',
+                peoples: [{
+                    id: 'chechens',
+                    name: 'Чеченцы',
+                    avatar: '🏔️',
+                    costume: { emoji: '🧥', label: 'Черкеска', desc: 'Мужская одежда с газырями и кинжалом' },
+                    dish: { emoji: '🍖', label: 'Жижиг-галнаш', desc: 'Мясо с чесночным соусом и тестом' },
+                    speech: { emoji: '🗣️', label: 'Маршалла!', desc: 'Приветствие на чеченском языке' }
+                }, {
+                    id: 'osetins',
+                    name: 'Осетины',
+                    avatar: '🏔️',
+                    costume: { emoji: '🧥', label: 'Чоха', desc: 'Мужской кафтан с поясом и кинжалом' },
+                    dish: { emoji: '🥧', label: 'Фыдджын', desc: 'Пирог с мясом и сыром' },
+                    speech: { emoji: '🗣️', label: 'Салам!', desc: 'Приветствие на осетинском языке' }
+                }, {
+                    id: 'avars',
+                    name: 'Аварцы',
+                    avatar: '🏔️',
+                    costume: { emoji: '🧥', label: 'Папаха', desc: 'Высокая папаха из каракуля' },
+                    dish: { emoji: '🥟', label: 'Хинкал', desc: 'Крупные пельмени с мясом и бульоном' },
+                    speech: { emoji: '🗣️', label: 'ВорчIами!', desc: 'Приветствие на аварском языке' }
+                }]
+            }, {
+                id: 'volga',
+                name: 'Поволжский',
+                icon: '🌾',
+                description: 'Народы Поволжья',
+                badge: '🌾',
+                fact: 'Поволжье — регион, где переплелись культуры тюркских и финно-угорских народов.',
+                peoples: [{
+                    id: 'tatars',
+                    name: 'Татары',
+                    avatar: '🌾',
+                    costume: { emoji: '🧥', label: 'Тюбетейка', desc: 'Национальный головной убор с вышивкой' },
+                    dish: { emoji: '🍯', label: 'Чак-чак', desc: 'Сладкое угощение из теста с мёдом' },
+                    speech: { emoji: '🗣️', label: 'Исәнмесез!', desc: 'Приветствие на татарском языке' }
+                }, {
+                    id: 'bashkirs',
+                    name: 'Башкиры',
+                    avatar: '🌾',
+                    costume: { emoji: '🧥', label: 'Елян', desc: 'Распашной халат с поясом' },
+                    dish: { emoji: '🍜', label: 'Бишбармак', desc: 'Мясо с крупной лапшой и бульоном' },
+                    speech: { emoji: '🗣️', label: 'Һаумы!', desc: 'Приветствие на башкирском языке' }
+                }, {
+                    id: 'chuvash',
+                    name: 'Чуваши',
+                    avatar: '🌾',
+                    costume: { emoji: '🧥', label: 'Кĕпе', desc: 'Рубаха с вышивкой и орнаментом' },
+                    dish: { emoji: '🍞', label: 'Çăкăр', desc: 'Традиционный чувашский хлеб' },
+                    speech: { emoji: '🗣️', label: 'Салам!', desc: 'Приветствие на чувашском языке' }
+                }]
+            }]
+        };
+
+        // ============================================================
+        //  STATE
+        // ============================================================
+        let state = {
+            level: 'easy', // 'easy' | 'hard'
+            score: 0,
+            completedRegions: [], // region ids
+            currentRegionIdx: 0,
+            // game in progress
+            matches: {}, // { peopleId: { costume: bool, dish: bool, speech: bool } }
+            matchCount: 0,
+            totalMatches: 0,
+            selectedAttrId: null, // for click matching
+            isGameComplete: false,
+            // recently earned badge
+            newBadge: null,
+        };
+
+        // ============================================================
+        //  HELPERS
+        // ============================================================
+        function loadState() {
+            try {
+                const raw = localStorage.getItem('mosaicRussia_state');
+                if (raw) {
+                    const saved = JSON.parse(raw);
+                    state.score = saved.score || 0;
+                    state.completedRegions = saved.completedRegions || [];
+                    state.level = saved.level || 'easy';
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('mosaicRussia_state', JSON.stringify({
+                    score: state.score,
+                    completedRegions: state.completedRegions,
+                    level: state.level
+                }));
+            } catch (e) { /* ignore */ }
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function getRegion(idx) {
+            return GAME_DATA.regions[idx];
+        }
+
+        function getPeoples(regionIdx) {
+            return GAME_DATA.regions[regionIdx].peoples;
+        }
+
+        function getAllAttributes(regionIdx) {
+            const peoples = getPeoples(regionIdx);
+            const attrs = [];
+            peoples.forEach(p => {
+                attrs.push({ type: 'costume', peopleId: p.id, ...p.costume });
+                attrs.push({ type: 'dish', peopleId: p.id, ...p.dish });
+                attrs.push({ type: 'speech', peopleId: p.id, ...p.speech });
+            });
+            return attrs;
+        }
+
+        function getAttributeId(peopleId, type) {
+            return `${peopleId}_${type}`;
+        }
+
+        function isRegionCompleted(regionId) {
+            return state.completedRegions.includes(regionId);
+        }
+
+        function isRegionAvailable(regionIdx) {
+            if (regionIdx === 0) return true;
+            // previous region must be completed
+            const prev = GAME_DATA.regions[regionIdx - 1];
+            return isRegionCompleted(prev.id);
+        }
+
+        function getTotalPeoples(regionIdx) {
+            return getPeoples(regionIdx).length;
+        }
+
+        function getTotalAttributes(regionIdx) {
+            return getTotalPeoples(regionIdx) * 3;
+        }
+
+        function getStarsForScore(score) {
+            if (score >= 12) return '⭐⭐⭐';
+            if (score >= 8) return '⭐⭐';
+            return '⭐';
+        }
+
+        function getFactForRegion(regionIdx) {
+            return GAME_DATA.regions[regionIdx].fact;
+        }
+
+        // ============================================================
+        //  RENDER: MAP
+        // ============================================================
+        function renderMap() {
+            const grid = document.getElementById('mapGrid');
+            grid.innerHTML = '';
+            const total = GAME_DATA.regions.length;
+            let completed = state.completedRegions.length;
+
+            GAME_DATA.regions.forEach((region, idx) => {
+                const done = isRegionCompleted(region.id);
+                const available = isRegionAvailable(idx);
+                const locked = !done && !available;
+
+                const card = document.createElement('div');
+                card.className = 'region-card';
+                if (done) card.classList.add('done');
+                if (locked) card.classList.add('locked');
+                if (available && !done) card.classList.add('available');
+
+                let statusText = '🔒 Заблокирован';
+                let statusClass = 'locked';
+                if (done) { statusText = '✅ Пройден';
+                    statusClass = 'done'; } else if (available) { statusText = '▶ Играть';
+                    statusClass = 'available'; }
+
+                card.innerHTML = `
+              <div class="region-icon">${region.icon}</div>
+              <div class="region-name">${region.name}</div>
+              <div class="region-sub">${region.description}</div>
+              <div class="region-status ${statusClass}">${statusText}</div>
+              ${done ? `<div class="badge-collect">${region.badge}</div>` : ''}
+            `;
+
+                if (available && !done) {
+                    card.addEventListener('click', () => {
+                        startGame(idx);
+                    });
+                }
+
+                grid.appendChild(card);
+            });
+
+            // Update progress
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('progressText').textContent = `${completed} / ${total}`;
+            document.getElementById('totalBadges').textContent = `${completed} / ${total}`;
+            document.getElementById('totalScore').textContent = state.score;
+
+            // show collection badge count
+            saveState();
+        }
+
+        // ============================================================
+        //  RENDER: GAME
+        // ============================================================
+        function startGame(regionIdx) {
+            state.currentRegionIdx = regionIdx;
+            state.matches = {};
+            state.matchCount = 0;
+            state.selectedAttrId = null;
+            state.isGameComplete = false;
+            state.newBadge = null;
+
+            const region = getRegion(regionIdx);
+            const peoples = getPeoples(regionIdx);
+            const total = getTotalAttributes(regionIdx);
+            state.totalMatches = total;
+
+            // init matches
+            peoples.forEach(p => {
+                state.matches[p.id] = { costume: false, dish: false, speech: false };
+            });
+
+            // show game screen
+            document.getElementById('mapScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+
+            document.getElementById('gameRegionIcon').textContent = region.icon;
+            document.getElementById('gameRegionName').textContent = region.name;
+            document.getElementById('gameTotalMatches').textContent = total;
+            updateGameProgress();
+
+            renderCharacters(regionIdx);
+            renderAttributes(regionIdx);
+            setFeedback('💡', 'Соедини атрибуты с правильными народами!', '');
+
+            // reset button
+            document.getElementById('backToMapBtn').onclick = () => goToMap();
+        }
+
+        function renderCharacters(regionIdx) {
+            const area = document.getElementById('charactersArea');
+            area.innerHTML = '';
+            const peoples = getPeoples(regionIdx);
+
+            peoples.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'char-card';
+                card.dataset.peopleId = p.id;
+                const slots = ['costume', 'dish', 'speech'];
+                const slotHtml = slots.map(type => {
+                    const matched = state.matches[p.id] && state.matches[p.id][type];
+                    const emoji = matched ? getAttributeEmoji(p, type) : '';
+                    return `<div class="slot ${matched ? 'filled' : ''}">${emoji}</div>`;
+                }).join('');
+
+                const allDone = slots.every(t => state.matches[p.id] && state.matches[p.id][t]);
+
+                card.innerHTML = `
+              <div class="avatar">${p.avatar}</div>
+              <div class="char-info">
+                <div class="name">${p.name}</div>
+                <div class="people">${p.costume.label.split(' ')[0]} · ${p.dish.label.split(' ')[0]} · ${p.speech.label}</div>
+                <div class="char-slots">${slotHtml}</div>
+              </div>
+              ${allDone ? '<div class="check-mark">✅</div>' : ''}
+            `;
+                if (allDone) card.classList.add('complete');
+
+                // Drag-drop target
+                card.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    card.classList.add('drag-over');
+                });
+                card.addEventListener('dragleave', () => {
+                    card.classList.remove('drag-over');
+                });
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    card.classList.remove('drag-over');
+                    const attrId = e.dataTransfer.getData('text/plain');
+                    if (attrId) handleMatch(attrId, p.id);
+                });
+
+                // Click target for matching
+                card.addEventListener('click', () => {
+                    if (state.selectedAttrId) {
+                        handleMatch(state.selectedAttrId, p.id);
+                        state.selectedAttrId = null;
+                        clearSelectedAttr();
+                    }
+                });
+
+                area.appendChild(card);
+            });
+        }
+
+        function renderAttributes(regionIdx) {
+            const grid = document.getElementById('attrGrid');
+            grid.innerHTML = '';
+            const attrs = getAllAttributes(regionIdx);
+            // shuffle
+            shuffleArray(attrs);
+
+            attrs.forEach((attr, idx) => {
+                const people = getPeoples(regionIdx).find(p => p.id === attr.peopleId);
+                if (!people) return;
+                const attrId = getAttributeId(attr.peopleId, attr.type);
+                const matched = state.matches[attr.peopleId] && state.matches[attr.peopleId][attr.type];
+
+                const card = document.createElement('div');
+                card.className = 'attr-card';
+                if (matched) card.classList.add('matched');
+                card.dataset.attrId = attrId;
+                card.dataset.peopleId = attr.peopleId;
+                card.dataset.type = attr.type;
+                card.draggable = !matched;
+
+                const typeLabels = { costume: '👘 Костюм', dish: '🍽 Блюдо', speech: '🗣 Говор' };
+                const typeLabel = typeLabels[attr.type] || attr.type;
+
+                const descHtml = state.level === 'hard' ? `<div class="attr-desc">${attr.desc}</div>` : '';
+
+                card.innerHTML = `
+              <div class="attr-emoji">${attr.emoji}</div>
+              <div class="attr-name">${attr.label}</div>
+              ${descHtml}
+              <div class="attr-type-tag">${typeLabel}</div>
+            `;
+
+                // Drag
+                card.addEventListener('dragstart', (e) => {
+                    if (card.classList.contains('matched')) { e.preventDefault(); return; }
+                    e.dataTransfer.setData('text/plain', attrId);
+                    e.dataTransfer.effectAllowed = 'copy';
+                });
+                card.addEventListener('dragend', () => {
+                    // no-op
+                });
+
+                // Click for selection
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (card.classList.contains('matched')) return;
+                    // toggle selection
+                    if (state.selectedAttrId === attrId) {
+                        state.selectedAttrId = null;
+                        clearSelectedAttr();
+                        setFeedback('💡', 'Выбери атрибут, затем нажми на народ.', '');
+                    } else {
+                        clearSelectedAttr();
+                        state.selectedAttrId = attrId;
+                        card.classList.add('selected');
+                        const peopleName = people ? people.name : '';
+                        setFeedback('👆', `Выбран: ${attr.label} (${peopleName}). Теперь нажми на народ.`, '');
+                    }
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        function getAttributeEmoji(people, type) {
+            const map = {
+                costume: people.costume.emoji,
+                dish: people.dish.emoji,
+                speech: people.speech.emoji,
+            };
+            return map[type] || '📌';
+        }
+
+        function clearSelectedAttr() {
+            document.querySelectorAll('.attr-card.selected').forEach(el => el.classList.remove('selected'));
+            state.selectedAttrId = null;
+        }
+
+        function updateGameProgress() {
+            const total = state.totalMatches;
+            const done = state.matchCount;
+            document.getElementById('gameMatchCount').textContent = done;
+            document.getElementById('gameTotalMatches').textContent = total;
+        }
+
+        function setFeedback(icon, text, cls) {
+            const bar = document.getElementById('feedbackBar');
+            document.getElementById('feedbackBar').querySelector('.fb-icon').textContent = icon;
+            document.getElementById('feedbackText').textContent = text;
+            bar.className = 'feedback-bar';
+            if (cls) bar.classList.add(cls);
+        }
+
+        // ============================================================
+        //  MATCHING LOGIC
+        // ============================================================
+        function handleMatch(attrId, peopleId) {
+            // parse attrId: "peopleId_type"
+            const parts = attrId.split('_');
+            if (parts.length !== 2) return;
+            const pId = parts[0];
+            const type = parts[1];
+
+            // validate
+            if (state.matches[pId] && state.matches[pId][type]) {
+                // already matched
+                setFeedback('⏳', 'Этот атрибут уже сопоставлен!', 'hint');
+                return;
+            }
+
+            // check if it's the right people
+            if (pId === peopleId) {
+                // correct!
+                state.matches[pId][type] = true;
+                state.matchCount++;
+                // add points
+                const points = state.level === 'easy' ? 5 : 8;
+                state.score += points;
+                document.getElementById('totalScore').textContent = state.score;
+                saveState();
+
+                // update UI
+                updateGameProgress();
+                renderCharacters(state.currentRegionIdx);
+                renderAttributes(state.currentRegionIdx);
+                clearSelectedAttr();
+
+                const people = getPeoples(state.currentRegionIdx).find(p => p.id === pId);
+                const attrLabel = getAttrLabel(pId, type);
+                setFeedback('✅', `Верно! ${people ? people.name : ''} — ${attrLabel} (+${points} очков)`, 'success');
+
+                // check if all matched
+                if (state.matchCount === state.totalMatches) {
+                    setTimeout(() => showResult(), 500);
+                }
+            } else {
+                // wrong
+                const people = getPeoples(state.currentRegionIdx).find(p => p.id === pId);
+                const targetPeople = getPeoples(state.currentRegionIdx).find(p => p.id === peopleId);
+                const attrLabel = getAttrLabel(pId, type);
+                setFeedback('🤔', `Попробуй ещё! ${attrLabel} не подходит для ${targetPeople ? targetPeople.name : ''}.`, 'hint');
+                // shake the wrong attr card
+                const cards = document.querySelectorAll('.attr-card');
+                cards.forEach(c => {
+                    if (c.dataset.attrId === attrId) {
+                        c.classList.add('wrong');
+                        setTimeout(() => c.classList.remove('wrong'), 500);
+                    }
+                });
+                // no penalty
+            }
+        }
+
+        function getAttrLabel(peopleId, type) {
+            const region = getRegion(state.currentRegionIdx);
+            const people = region.peoples.find(p => p.id === peopleId);
+            if (!people) return '—';
+            const map = {
+                costume: people.costume.label,
+                dish: people.dish.label,
+                speech: people.speech.label,
+            };
+            return map[type] || '—';
+        }
+
+        // ============================================================
+        //  RESULT
+        // ============================================================
+        function showResult() {
+            state.isGameComplete = true;
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const region = getRegion(state.currentRegionIdx);
+            const regionId = region.id;
+
+            // mark region completed if not already
+            if (!state.completedRegions.includes(regionId)) {
+                state.completedRegions.push(regionId);
+                state.newBadge = region.badge;
+                saveState();
+            }
+
+            const totalAttrs = state.totalMatches;
+            const correct = state.matchCount;
+            const pct = totalAttrs > 0 ? Math.round((correct / totalAttrs) * 100) : 0;
+            let stars = '⭐';
+            if (pct >= 90) stars = '⭐⭐⭐';
+            else if (pct >= 60) stars = '⭐⭐';
+
+            const pointsEarned = state.level === 'easy' ? correct * 5 : correct * 8;
+            // use actual earned points
+            const earned = state.level === 'easy' ? correct * 5 : correct * 8;
+
+            document.getElementById('resultIcon').textContent = pct >= 80 ? '🎉' : '👏';
+            document.getElementById('resultTitle').textContent = pct >= 80 ? 'Отлично!' : 'Хорошо!';
+            document.getElementById('resultStars').textContent = stars;
+            document.getElementById('resultScore').textContent = `+${earned} очков`;
+            document.getElementById('resultBadge').textContent = region.badge;
+            document.getElementById('resultBadgeLabel').textContent = state.newBadge ? '🎖 Новый значок получен!' :
+                'Значок уже в коллекции!';
+            document.getElementById('factText').textContent = getFactForRegion(state.currentRegionIdx);
+
+            // update map progress
+            renderMap();
+        }
+
+        // ============================================================
+        //  NAVIGATION
+        // ============================================================
+        function goToMap() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('mapScreen').classList.remove('hidden');
+            renderMap();
+            saveState();
+        }
+
+        // ============================================================
+        //  COLLECTION
+        // ============================================================
+        function renderCollection() {
+            const grid = document.getElementById('collectionGrid');
+            grid.innerHTML = '';
+            GAME_DATA.regions.forEach(region => {
+                const done = isRegionCompleted(region.id);
+                const item = document.createElement('div');
+                item.className = 'badge-item' + (done ? '' : ' locked-badge');
+                item.innerHTML = `
+              <div class="b-icon">${done ? region.badge : '❓'}</div>
+              <div class="b-name">${done ? region.name : '???'}</div>
+            `;
+                grid.appendChild(item);
+            });
+        }
+
+        document.getElementById('showCollectionBtn').addEventListener('click', () => {
+            renderCollection();
+            document.getElementById('collectionOverlay').classList.add('open');
+        });
+
+        document.getElementById('closeCollectionBtn').addEventListener('click', () => {
+            document.getElementById('collectionOverlay').classList.remove('open');
+        });
+        document.getElementById('collectionOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                document.getElementById('collectionOverlay').classList.remove('open');
+            }
+        });
+
+        // ============================================================
+        //  LEVEL TOGGLE
+        // ============================================================
+        document.getElementById('lvlEasy').addEventListener('click', () => {
+            state.level = 'easy';
+            document.getElementById('lvlEasy').classList.add('active');
+            document.getElementById('lvlHard').classList.remove('active');
+            saveState();
+            // show extra desc for hard mode
+            document.querySelectorAll('.attr-desc').forEach(el => el.style.display = 'none');
+        });
+
+        document.getElementById('lvlHard').addEventListener('click', () => {
+            state.level = 'hard';
+            document.getElementById('lvlHard').classList.add('active');
+            document.getElementById('lvlEasy').classList.remove('active');
+            saveState();
+            document.querySelectorAll('.attr-desc').forEach(el => el.style.display = 'block');
+        });
+
+        // ============================================================
+        //  RESULT BUTTONS
+        // ============================================================
+        document.getElementById('resultContinueBtn').addEventListener('click', () => {
+            // find next available region
+            const nextIdx = findNextAvailableRegion();
+            if (nextIdx !== -1) {
+                startGame(nextIdx);
+            } else {
+                goToMap();
+                setFeedback('🎉', 'Ты прошёл все регионы! Поздравляем!', 'success');
+            }
+        });
+
+        document.getElementById('resultMapBtn').addEventListener('click', goToMap);
+
+        function findNextAvailableRegion() {
+            for (let i = 0; i < GAME_DATA.regions.length; i++) {
+                const region = GAME_DATA.regions[i];
+                if (!isRegionCompleted(region.id) && isRegionAvailable(i)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+        function init() {
+            loadState();
+            // set level UI
+            if (state.level === 'hard') {
+                document.getElementById('lvlHard').classList.add('active');
+                document.getElementById('lvlEasy').classList.remove('active');
+            } else {
+                document.getElementById('lvlEasy').classList.add('active');
+                document.getElementById('lvlHard').classList.remove('active');
+            }
+            renderMap();
+
+            // if there's an available region, maybe show a hint
+            const firstAvail = findNextAvailableRegion();
+            if (firstAvail === -1 && state.completedRegions.length === GAME_DATA.regions.length) {
+                // all done
+                setFeedback('🎉', 'Ты собрал всю коллекцию! Молодец!', 'success');
+            }
+
+            // handle hard mode desc visibility
+            if (state.level === 'hard') {
+                document.querySelectorAll('.attr-desc').forEach(el => el.style.display = 'block');
+            } else {
+                document.querySelectorAll('.attr-desc').forEach(el => el.style.display = 'none');
+            }
+        }
+
+        // Override setFeedback for map screen usage
+        const origSetFeedback = setFeedback;
+        setFeedback = function(icon, text, cls) {
+            const bar = document.getElementById('feedbackBar');
+            if (!bar) return;
+            bar.querySelector('.fb-icon').textContent = icon;
+            document.getElementById('feedbackText').textContent = text;
+            bar.className = 'feedback-bar';
+            if (cls) bar.classList.add(cls);
+        };
+
+        // patch: feedback on map
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            // if map is visible, show a welcome message
+            if (!document.getElementById('gameScreen').classList.contains('hidden')) {
+                // game is active
+            } else {
+                const fb = document.getElementById('feedbackBar');
+                if (fb) {
+                    fb.querySelector('.fb-icon').textContent = '🗺️';
+                    document.getElementById('feedbackText').textContent =
+                        'Выбери регион и начни путешествие по культуре народов России!';
+                }
+            }
+        });
+
+        // Re-run after any navigation
+        console.log('🧩 Мозаика России загружена!');
+    </script>
+</body>
+</html>
+```
+

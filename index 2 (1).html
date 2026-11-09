@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Мозаика России — игра-соответствие о народах России</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F2A44;
+    --navy-deep:#161E33;
+    --paper:#FDF6E9;
+    --paper-dim:#F3E9D4;
+    --red:#D6483A;
+    --gold:#E8AA3B;
+    --teal:#3C9C93;
+    --ink:#22314A;
+    --ink-soft:#5B6B85;
+    --ok:#3C9C93;
+    --shadow: 0 10px 24px rgba(10,14,28,.35);
+    --radius-lg: 26px;
+    --radius-md: 16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito', system-ui, sans-serif;
+    color:var(--paper);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(232,170,59,.18), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(60,156,147,.22), transparent 55%),
+      linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fredoka', 'Nunito', sans-serif; margin:0;}
+  button{font-family:inherit;}
+  #app{
+    max-width:960px;
+    margin:0 auto;
+    padding:20px 18px 60px;
+    min-height:100vh;
+  }
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; margin-bottom:22px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px;
+  }
+  .brand-mark{
+    width:46px;height:46px;border-radius:14px;
+    background:conic-gradient(from 210deg, var(--red), var(--gold), var(--teal), var(--red));
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px; flex-shrink:0;
+    box-shadow: var(--shadow);
+  }
+  .brand h1{font-size:1.35rem; color:var(--paper); letter-spacing:.2px;}
+  .brand p{margin:2px 0 0; font-size:.82rem; color:#AEB9CF;}
+  .stat-pills{display:flex; gap:10px; flex-wrap:wrap;}
+  .pill{
+    background:rgba(253,246,233,.08);
+    border:1px solid rgba(253,246,233,.16);
+    padding:8px 14px; border-radius:100px;
+    font-weight:700; font-size:.86rem;
+    display:flex; align-items:center; gap:6px;
+    color:var(--paper);
+  }
+  .pill button{
+    background:none;border:none;color:inherit;font-weight:700;
+    cursor:pointer; font-size:.8rem; opacity:.75; padding:0 0 0 6px;
+    border-left:1px solid rgba(253,246,233,.25);
+  }
+  .pill button:hover{opacity:1;}
+
+  /* ---------- generic card ---------- */
+  .panel{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding:28px;
+  }
+  @media (max-width:560px){ .panel{padding:20px;} }
+
+  /* ---------- START / DIFFICULTY SCREEN ---------- */
+  .start-hero{
+    text-align:center; padding:10px 6px 30px;
+  }
+  .start-hero .glyphs{font-size:2rem; letter-spacing:14px; margin-bottom:6px;}
+  .start-hero h2{font-size:1.9rem; color:var(--paper); margin-bottom:10px;}
+  .start-hero p{color:#C3CCE0; max-width:520px; margin:0 auto; line-height:1.5;}
+  .age-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:26px;
+  }
+  @media (max-width:560px){ .age-grid{grid-template-columns:1fr;} }
+  .age-card{
+    background:var(--paper); border-radius:var(--radius-lg);
+    padding:24px; text-align:left; cursor:pointer;
+    border:3px solid transparent;
+    box-shadow: var(--shadow);
+    transition:transform .15s ease, border-color .15s ease;
+    color:var(--ink);
+  }
+  .age-card:hover{transform:translateY(-4px); border-color:var(--gold);}
+  .age-card .age-num{
+    font-family:'Fredoka'; font-size:2.2rem; font-weight:700; color:var(--red);
+  }
+  .age-card h3{font-size:1.1rem; margin:6px 0 8px;}
+  .age-card p{margin:0; color:var(--ink-soft); font-size:.9rem; line-height:1.45;}
+
+  /* ---------- MAP SCREEN ---------- */
+  .map-intro{margin-bottom:18px;}
+  .map-intro h2{color:var(--paper); font-size:1.5rem;}
+  .map-intro p{color:#AEB9CF; margin:6px 0 0;}
+  .trail{
+    position:relative;
+    padding:10px 0 6px;
+  }
+  .trail::before{
+    content:"";
+    position:absolute; left:50%; top:8px; bottom:8px;
+    width:3px; transform:translateX(-50%);
+    background-image: linear-gradient(180deg, rgba(253,246,233,.35) 0 10px, transparent 10px 20px);
+    background-size: 3px 20px;
+  }
+  @media (max-width:620px){ .trail::before{left:28px;} }
+  .trail-node{
+    position:relative; display:flex; align-items:stretch; gap:18px;
+    margin:0 0 22px; width:58%;
+  }
+  .trail-node:nth-child(odd){margin-left:0; flex-direction:row;}
+  .trail-node:nth-child(even){margin-left:42%; flex-direction:row;}
+  @media (max-width:620px){
+    .trail-node, .trail-node:nth-child(odd), .trail-node:nth-child(even){
+      width:100%; margin-left:0; padding-left:56px;
+    }
+  }
+  .node-dot{
+    flex-shrink:0; width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka'; font-weight:700; font-size:1.2rem;
+    background:var(--paper); color:var(--ink);
+    box-shadow: var(--shadow);
+    position:relative; z-index:1;
+  }
+  @media (max-width:620px){ .node-dot{position:absolute; left:2px; top:2px;} }
+  .trail-node.locked .node-dot{background:rgba(253,246,233,.25); color:rgba(253,246,233,.6);}
+  .trail-node.done .node-dot{background:var(--teal); color:var(--paper);}
+  .node-card{
+    flex:1; background:var(--paper); color:var(--ink);
+    border-radius:var(--radius-md); padding:16px 18px;
+    display:flex; flex-direction:column; gap:6px; justify-content:center;
+    box-shadow: var(--shadow);
+    cursor:pointer; border:none; text-align:left;
+    font-family:inherit;
+  }
+  .trail-node.locked .node-card{
+    background:rgba(253,246,233,.12); color:rgba(253,246,233,.65);
+    cursor:not-allowed; box-shadow:none;
+  }
+  .node-card h3{font-size:1.05rem;}
+  .node-card .node-meta{font-size:.82rem; color:var(--ink-soft); display:flex; gap:10px; flex-wrap:wrap;}
+  .trail-node.locked .node-card .node-meta{color:rgba(253,246,233,.5);}
+  .node-badge-strip{display:flex; gap:6px; margin-top:2px;}
+  .node-badge-strip span{font-size:1.1rem;}
+  .lock-note{font-size:.78rem; font-style:italic;}
+
+  .badge-collection{margin-top:34px;}
+  .badge-collection h3{color:var(--paper); font-size:1.05rem; margin-bottom:12px;}
+  .badge-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .badge-chip{
+    background:rgba(253,246,233,.08); border:1px solid rgba(253,246,233,.16);
+    border-radius:14px; padding:10px 14px; min-width:96px; text-align:center;
+    color:var(--paper);
+  }
+  .badge-chip.empty{opacity:.35;}
+  .badge-chip .emoji{font-size:1.6rem; display:block; margin-bottom:4px;}
+  .badge-chip .name{font-size:.72rem; font-weight:700;}
+
+  /* ---------- GAME SCREEN ---------- */
+  .game-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin-bottom:16px; flex-wrap:wrap;
+  }
+  .back-btn{
+    background:rgba(253,246,233,.1); border:1px solid rgba(253,246,233,.2);
+    color:var(--paper); padding:8px 14px; border-radius:100px; cursor:pointer;
+    font-weight:700; font-size:.85rem;
+  }
+  .game-head h2{color:var(--paper); font-size:1.3rem;}
+  .progress-bar-track{
+    background:rgba(253,246,233,.15); border-radius:100px; height:10px; overflow:hidden; margin:14px 0 22px;
+  }
+  .progress-bar-fill{
+    height:100%; background:linear-gradient(90deg, var(--teal), var(--gold));
+    width:0%; transition:width .3s ease;
+  }
+  .hint-banner{
+    background:#FFF1DC; border:2px dashed var(--gold); color:#7A5417;
+    border-radius:14px; padding:12px 16px; font-weight:700; font-size:.92rem;
+    margin-bottom:18px; display:none; align-items:center; gap:10px;
+  }
+  .hint-banner.show{display:flex;}
+  .board{
+    display:grid; grid-template-columns:1fr 1.15fr; gap:22px;
+  }
+  @media (max-width:700px){ .board{grid-template-columns:1fr;} }
+  .col-title{font-size:.95rem; color:var(--ink-soft); font-weight:800; margin-bottom:10px;}
+  .char-list{display:flex; flex-direction:column; gap:12px;}
+  .char-card{
+    background:var(--paper-dim); border:3px solid transparent; border-radius:16px;
+    padding:14px 16px; cursor:pointer; display:flex; align-items:center; gap:12px;
+    transition:border-color .15s ease, transform .1s ease;
+  }
+  .char-card:hover{transform:translateY(-2px);}
+  .char-card.selected{border-color:var(--gold); background:#FFF7E8;}
+  .char-card.complete{border-color:var(--teal); background:#EAF7F5;}
+  .char-card.dragover{border-color:var(--red); border-style:dashed;}
+  .char-avatar{
+    width:44px;height:44px;border-radius:50%;
+    background:var(--navy); color:var(--paper);
+    display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;
+  }
+  .char-card.complete .char-avatar{background:var(--teal);}
+  .char-info b{display:block; font-size:1rem;}
+  .char-info span{font-size:.82rem; color:var(--ink-soft);}
+  .char-check{margin-left:auto; font-size:1.2rem; opacity:0; transition:opacity .15s;}
+  .char-card.complete .char-check{opacity:1;}
+  .attr-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  }
+  @media (max-width:420px){ .attr-grid{grid-template-columns:1fr;} }
+  .attr-card{
+    background:var(--paper-dim); border-radius:14px; padding:12px 14px;
+    cursor:grab; border:3px solid transparent; text-align:left;
+    display:flex; flex-direction:column; gap:6px; min-height:92px;
+    transition:transform .12s ease, border-color .15s ease, opacity .2s ease;
+  }
+  .attr-card .attr-emoji{font-size:1.4rem;}
+  .attr-card .attr-text{font-size:.82rem; line-height:1.35; color:var(--ink-soft);}
+  .attr-card .attr-kind{font-size:.68rem; font-weight:800; color:var(--red); text-transform:none;}
+  .attr-card:hover{transform:translateY(-2px);}
+  .attr-card.matched{
+    opacity:0; pointer-events:none; transform:scale(.85);
+  }
+  .attr-card.wrong{animation:shake .35s ease;}
+  .attr-card.selected{border-color:var(--gold);}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-6px);}
+    75%{transform:translateX(6px);}
+  }
+
+  /* ---------- RESULT SCREEN ---------- */
+  .result-wrap{text-align:center; padding:8px 4px;}
+  .stars{font-size:2.4rem; margin:6px 0 4px; letter-spacing:6px;}
+  .result-wrap h2{font-size:1.5rem; margin-bottom:4px;}
+  .result-score{color:var(--ink-soft); font-weight:700; margin-bottom:20px;}
+  .badge-earned{
+    display:inline-flex; flex-direction:column; align-items:center; gap:8px;
+    background:var(--paper-dim); border-radius:18px; padding:18px 26px; margin-bottom:22px;
+  }
+  .badge-earned .emoji{font-size:2.6rem;}
+  .badge-earned .name{font-weight:800;}
+  .fact-box{
+    background:#EAF7F5; border-left:5px solid var(--teal); border-radius:10px;
+    text-align:left; padding:14px 18px; margin:0 auto 26px; max-width:520px;
+    font-size:.92rem; line-height:1.5; color:var(--ink);
+  }
+  .fact-box b{color:#1F5F5A;}
+  .result-actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    border:none; border-radius:100px; padding:13px 26px; font-weight:800;
+    font-size:.95rem; cursor:pointer; transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:hover{transform:translateY(-2px); filter:brightness(1.05);}
+  .btn:active{transform:translateY(0);}
+  .btn-primary{background:var(--red); color:#fff;}
+  .btn-secondary{background:var(--navy); color:var(--paper);}
+  .btn-ghost{background:transparent; color:var(--ink-soft); border:2px solid #D9CFB6;}
+
+  footer.credit{
+    text-align:center; color:#7280A0; font-size:.75rem; margin-top:40px;
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     ДАННЫЕ О НАРОДАХ
+  ==========================================================*/
+  const REGIONS = [
+    {
+      id:'volga', name:'Поволжье', subtitle:'Реки, ремёсла и гостеприимство',
+      peoples:[
+        {id:'tatar', name:'Тимур', people:'Татары', avatar:'🧑',
+          costumeEmoji:'🧕', costumeText:'Калфак — шапочка, расшитая жемчугом, и чёрный бархатный камзол.',
+          dishEmoji:'🥟', dishText:'Эчпочмак — треугольный пирожок с мясом и картошкой.',
+          speechEmoji:'💬', speechText:'«Әйдә!» — на татарском это значит «Пошли!».',
+          fact:'Татарский узор часто похож на цветущий тюльпан — этот цветок считается символом весны и обновления.'},
+        {id:'chuvash', name:'Улина', people:'Чуваши', avatar:'👧',
+          costumeEmoji:'👗', costumeText:'Белая рубаха и остроконечная шапочка тухья, расшитая монетками.',
+          dishEmoji:'🥧', dishText:'Хуплу — сытный пирог с мясом, картофелем и крупой.',
+          speechEmoji:'💬', speechText:'«Аван-и!» — по-чувашски «Здравствуй!».',
+          fact:'Женский убор тухья мог весить несколько килограммов — столько на него нашивали монет и бусин.'},
+        {id:'mordva', name:'Вежай', people:'Мордва', avatar:'🧑',
+          costumeEmoji:'🧣', costumeText:'Рубаха панар с алой вышивкой и высокий убор панго.',
+          dishEmoji:'🍲', dishText:'Пшённая каша с топлёным молоком и лесными ягодами.',
+          speechEmoji:'💬', speechText:'«Шумбрат!» — так мордва здоровается друг с другом.',
+          fact:'У мордвы два родственных народа — эрзя и мокша, и у каждого свой язык и свои узоры в вышивке.'},
+        {id:'mari', name:'Онар', people:'Марийцы', avatar:'👦',
+          costumeEmoji:'🎀', costumeText:'Рубаха с геометрической вышивкой и убор шурка, увешанный монетами.',
+          dishEmoji:'🥞', dishText:'Команмелна — слоёные блины со сметаной.',
+          speechEmoji:'💬', speechText:'«Салам!» — марийское приветствие.',
+          fact:'Марийцев иногда называют «последними язычниками Европы»: часть из них до сих пор молится в священных рощах.'}
+      ]
+    },
+    {
+      id:'kavkaz', name:'Северный Кавказ', subtitle:'Горы, танцы и законы гостеприимства',
+      peoples:[
+        {id:'osetin', name:'Алан', people:'Осетины', avatar:'🧑',
+          costumeEmoji:'🧥', costumeText:'Черкеска с газырями на груди и папаха из каракуля.',
+          dishEmoji:'🥧', dishText:'Осетинский пирог с сыром и свежей зеленью.',
+          speechEmoji:'💬', speechText:'«Салам!» — осетинское приветствие.',
+          fact:'Осетинский пирог режут на строго определённое число долек — с этим связаны старинные застольные традиции.'},
+        {id:'chechen', name:'Ислам', people:'Чеченцы', avatar:'🧑',
+          costumeEmoji:'🎩', costumeText:'Черкеска с кинжалом на поясе и высокая папаха.',
+          dishEmoji:'🍜', dishText:'Жижиг-галнаш — отварное мясо с галушками из кукурузной муки.',
+          speechEmoji:'💬', speechText:'«Маршалла!» — «Добро пожаловать!» по-чеченски.',
+          fact:'Гостеприимство у чеченцев — это неписаный закон: гостю всегда достаётся лучшее место за столом.'},
+        {id:'avar', name:'Гамзат', people:'Аварцы', avatar:'👦',
+          costumeEmoji:'🧢', costumeText:'Овчинная бурка и войлочная шапка горца.',
+          dishEmoji:'🥘', dishText:'Хинкал — кусочки теста с мясным бульоном и чесночной подливой.',
+          speechEmoji:'💬', speechText:'«Ворчами!» — аварское приветствие гостю.',
+          fact:'Аварцы — самый многочисленный из десятков народов Дагестана, где говорят почти на 30 разных языках.'},
+        {id:'kabard', name:'Заур', people:'Кабардинцы', avatar:'🧑',
+          costumeEmoji:'🧣', costumeText:'Тонкая серая черкеска и мягкие сапоги для верховой езды.',
+          dishEmoji:'🍗', dishText:'Ляпс — курица в остром соусе с толчёным чесноком.',
+          speechEmoji:'💬', speechText:'«ФIэхъус апщий!» — «Привет, друг!» по-кабардински.',
+          fact:'У кабардинцев есть древний свод правил «адыгэ хабзэ» — кодекс вежливости и достоинства.'}
+      ]
+    },
+    {
+      id:'sibir', name:'Сибирь и Дальний Восток', subtitle:'Тайга, тундра и северное сияние',
+      peoples:[
+        {id:'buryat', name:'Баир', people:'Буряты', avatar:'🧑',
+          costumeEmoji:'🥋', costumeText:'Дэгэл — плотный халат, подпоясанный ярким кушаком.',
+          dishEmoji:'🥟', dishText:'Буузы — паровые пельмени с бульоном внутри.',
+          speechEmoji:'💬', speechText:'«Сайн байна!» — бурятское «Здравствуй!».',
+          fact:'Буряты — крупнейший коренной народ Сибири, а буузы принято есть руками, аккуратно надкусывая с краю.'},
+        {id:'yakut', name:'Айыына', people:'Якуты (саха)', avatar:'👧',
+          costumeEmoji:'🧤', costumeText:'Меховая шуба и шапка с орнаментом в виде оленьих рогов.',
+          dishEmoji:'🐟', dishText:'Строганина — тонко нарезанная мороженая рыба.',
+          speechEmoji:'💬', speechText:'«Дорообо!» — якутское приветствие.',
+          fact:'В Якутии находится полюс холода — там зимой случаются морозы за −60 градусов.'},
+        {id:'hanty', name:'Ими', people:'Ханты', avatar:'👦',
+          costumeEmoji:'🦌', costumeText:'Малица — одежда из оленьих шкур мехом внутрь.',
+          dishEmoji:'🍢', dishText:'Юкола — рыба, вяленная на солнце и ветру.',
+          speechEmoji:'💬', speechText:'«Вулю-вулю!» — хантыйское приветствие.',
+          fact:'Ханты и сегодня кочуют за стадами оленей по тундре и тайге всей семьёй.'},
+        {id:'chukcha', name:'Тынэтэгин', people:'Чукчи', avatar:'🧑',
+          costumeEmoji:'🧊', costumeText:'Кухлянка — двойная меховая рубаха с капюшоном.',
+          dishEmoji:'🦐', dishText:'Мясо морского зверя — традиционная еда охотников тундры и побережья.',
+          speechEmoji:'💬', speechText:'«Етти!» — «Здравствуй, ты пришёл!» по-чукотски.',
+          fact:'Чукчи делятся на береговых охотников на морского зверя и оленеводов тундры.'}
+      ]
+    }
+  ];
+
+  const REGION_BADGES = {
+    volga:  {emoji:'🌾', name:'Дух Волги'},
+    kavkaz: {emoji:'🏔️', name:'Сердце гор'},
+    sibir:  {emoji:'❄️', name:'Хранитель тайги'}
+  };
+
+  /* =========================================================
+     СОСТОЯНИЕ И СОХРАНЕНИЕ
+  ==========================================================*/
+  const SAVE_KEY = 'mosaicRussiaSave_v1';
+
+  function defaultState(){
+    return { difficulty:null, score:0, completedRegions:[], badges:[] };
+  }
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(SAVE_KEY);
+      if(!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      return Object.assign(defaultState(), parsed);
+    }catch(e){ return defaultState(); }
+  }
+  function saveState(){
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){/* ignore */}
+  }
+
+  let state = loadState();
+
+  /* runtime-only (not persisted) game session */
+  let session = null;
+
+  /* =========================================================
+     ХЕЛПЕРЫ
+  ==========================================================*/
+  function el(html){
+    const t = document.createElement('template');
+    t.innerHTML = html.trim();
+    return t.content.firstElementChild;
+  }
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+  function isRegionUnlocked(index){
+    if(index === 0) return true;
+    return state.completedRegions.includes(REGIONS[index-1].id);
+  }
+  function peoplesForDifficulty(region){
+    const count = state.difficulty === 'младшие' ? 3 : 4;
+    return region.peoples.slice(0, count);
+  }
+
+  const app = document.getElementById('app');
+
+  /* =========================================================
+     ЭКРАН: ВЫБОР ВОЗРАСТА
+  ==========================================================*/
+  function renderStart(){
+    app.innerHTML = '';
+    app.appendChild(el(`
+      <div>
+        <div class="topbar">
+          <div class="brand">
+            <div class="brand-mark">🧩</div>
+            <div>
+              <h1>Мозаика России</h1>
+              <p>Путешествие по народам большой страны</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel start-hero">
+          <div class="glyphs">🧣 🥟 🏔️ 🥁 ❄️</div>
+          <h2>Собери мозаику культур</h2>
+          <p>Знакомься с народами России: подбирай костюм, блюдо и приветствие
+             каждому герою. Для начала расскажи, для кого мы настроим игру.</p>
+          <div class="age-grid">
+            <button class="age-card" data-age="младшие">
+              <div class="age-num">7–10</div>
+              <h3>Младшая группа</h3>
+              <p>Крупные карточки, короткие подсказки, по 3 героя в регионе — легко освоиться.</p>
+            </button>
+            <button class="age-card" data-age="старшие">
+              <div class="age-num">11–14</div>
+              <h3>Старшая группа</h3>
+              <p>По 4 героя в регионе, больше фактов и более внимательные задания.</p>
+            </button>
+          </div>
+        </div>
+        <footer class="credit">Прогресс сохраняется в этом браузере автоматически.</footer>
+      </div>
+    `));
+    app.querySelectorAll('.age-card').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        state.difficulty = btn.dataset.age;
+        saveState();
+        renderMap();
+      });
+    });
+  }
+
+  /* =========================================================
+     ЭКРАН: КАРТА ПУТЕШЕСТВИЯ
+  ==========================================================*/
+  function renderMap(){
+    app.innerHTML = '';
+    const totalPeoplesDone = state.completedRegions.length;
+
+    const wrap = el(`<div></div>`);
+    wrap.appendChild(el(`
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark">🧩</div>
+          <div>
+            <h1>Мозаика России</h1>
+            <p>Карта путешествия</p>
+          </div>
+        </div>
+        <div class="stat-pills">
+          <div class="pill">⭐ ${state.score} очков</div>
+          <div class="pill">🗺️ ${totalPeoplesDone}/${REGIONS.length} регионов</div>
+          <div class="pill">Возраст: ${state.difficulty === 'младшие' ? '7–10' : '11–14'}
+            <button id="changeAge" title="Изменить возрастную группу">✎</button>
+          </div>
+        </div>
+      </div>
+    `));
+
+    wrap.appendChild(el(`
+      <div class="map-intro">
+        <h2>Выбирай регион и собирай мозаику</h2>
+        <p>Пройди регионы по порядку — каждый следующий откроется, когда закончишь предыдущий.</p>
+      </div>
+    `));
+
+    const trail = el(`<div class="trail"></div>`);
+    REGIONS.forEach((region, idx)=>{
+      const unlocked = isRegionUnlocked(idx);
+      const completed = state.completedRegions.includes(region.id);
+      const badge = REGION_BADGES[region.id];
+      const status = completed ? 'done' : (unlocked ? 'open' : 'locked');
+      const node = el(`
+        <div class="trail-node ${status === 'locked' ? 'locked' : ''} ${status === 'done' ? 'done' : ''}">
+          <div class="node-dot">${completed ? '✓' : (idx+1)}</div>
+          <button class="node-card" ${unlocked ? '' : 'disabled'} data-region="${region.id}">
+            <h3>${region.name}</h3>
+            <div class="node-meta">
+              <span>${region.subtitle}</span>
+            </div>
+            <div class="node-meta">
+              <span>${peoplesForDifficulty(region).length} народа в раунде</span>
+              ${completed ? `<span class="node-badge-strip"><span>${badge.emoji}</span> ${badge.name}</span>` : ''}
+            </div>
+            ${unlocked ? '' : `<div class="lock-note">Открой предыдущий регион, чтобы начать этот</div>`}
+          </button>
+        </div>
+      `);
+      trail.appendChild(node);
+    });
+    wrap.appendChild(trail);
+
+    const badgeSection = el(`
+      <div class="badge-collection">
+        <h3>Коллекция значков</h3>
+        <div class="badge-row"></div>
+      </div>
+    `);
+    const badgeRow = badgeSection.querySelector('.badge-row');
+    REGIONS.forEach(region=>{
+      const b = REGION_BADGES[region.id];
+      const owned = state.badges.includes(region.id);
+      badgeRow.appendChild(el(`
+        <div class="badge-chip ${owned ? '' : 'empty'}">
+          <span class="emoji">${owned ? b.emoji : '❔'}</span>
+          <span class="name">${owned ? b.name : '???'}</span>
+        </div>
+      `));
+    });
+    wrap.appendChild(badgeSection);
+
+    wrap.appendChild(el(`<footer class="credit">Мозаика России — учебный прототип. Данные сохраняются в этом браузере.</footer>`));
+
+    app.appendChild(wrap);
+
+    app.querySelectorAll('.node-card[data-region]:not([disabled])').forEach(btn=>{
+      btn.addEventListener('click', ()=> startRound(btn.dataset.region));
+    });
+    const changeAge = document.getElementById('changeAge');
+    if(changeAge){
+      changeAge.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        renderStart();
+      });
+    }
+  }
+
+  /* =========================================================
+     ЭКРАН: СОПОСТАВЛЕНИЕ
+  ==========================================================*/
+  function startRound(regionId){
+    const region = REGIONS.find(r=>r.id === regionId);
+    const peoples = peoplesForDifficulty(region);
+
+    let attrCards = [];
+    peoples.forEach(p=>{
+      attrCards.push({key:p.id+'-costume', peopleId:p.id, type:'costume', emoji:p.costumeEmoji, text:p.costumeText, label:'Костюм'});
+      attrCards.push({key:p.id+'-dish', peopleId:p.id, type:'dish', emoji:p.dishEmoji, text:p.dishText, label:'Блюдо'});
+      attrCards.push({key:p.id+'-speech', peopleId:p.id, type:'speech', emoji:p.speechEmoji, text:p.speechText, label:'Говор'});
+    });
+    attrCards = shuffle(attrCards);
+
+    session = {
+      regionId, region, peoples,
+      attrCards,
+      matched: new Set(),
+      selectedCharacter: null,
+      wrongAttempts: 0,
+      total: attrCards.length
+    };
+    renderGame();
+  }
+
+  function renderGame(){
+    app.innerHTML = '';
+    const { region, peoples, attrCards, matched, total } = session;
+
+    const wrap = el(`<div></div>`);
+    wrap.appendChild(el(`
+      <div class="game-head">
+        <button class="back-btn" id="backToMap">← Карта</button>
+        <h2>${region.name}</h2>
+        <div class="pill">⭐ ${state.score}</div>
+      </div>
+    `));
+    wrap.appendChild(el(`<div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>`));
+    wrap.appendChild(el(`<div class="hint-banner" id="hintBanner"></div>`));
+
+    const panel = el(`<div class="panel"><div class="board"></div></div>`);
+    const board = panel.querySelector('.board');
+
+    const charCol = el(`<div><div class="col-title">Герои региона — сначала выбери героя</div><div class="char-list" id="charList"></div></div>`);
+    const charList = charCol.querySelector('#charList');
+    peoples.forEach(p=>{
+      const doneCount = ['costume','dish','speech'].filter(t=>matched.has(p.id+'-'+t)).length;
+      const complete = doneCount === 3;
+      const card = el(`
+        <div class="char-card ${complete ? 'complete' : ''}" data-people="${p.id}">
+          <div class="char-avatar">${p.avatar}</div>
+          <div class="char-info">
+            <b>${p.name}</b>
+            <span>${p.people}</span>
+          </div>
+          <div class="char-check">✅</div>
+        </div>
+      `);
+      charList.appendChild(card);
+    });
+
+    const attrCol = el(`<div><div class="col-title">Костюм, блюдо и говор — перемешаны</div><div class="attr-grid" id="attrGrid"></div></div>`);
+    const attrGrid = attrCol.querySelector('#attrGrid');
+    attrCards.forEach(c=>{
+      const isMatched = matched.has(c.key);
+      const card = el(`
+        <div class="attr-card ${isMatched ? 'matched' : ''}" data-key="${c.key}" draggable="${!isMatched}">
+          <span class="attr-emoji">${c.emoji}</span>
+          <span class="attr-kind">${c.label}</span>
+          <span class="attr-text">${c.text}</span>
+        </div>
+      `);
+      attrGrid.appendChild(card);
+    });
+
+    board.appendChild(charCol);
+    board.appendChild(attrCol);
+    wrap.appendChild(panel);
+    wrap.appendChild(el(`<footer class="credit">Собери все пары — костюм, блюдо и говор для каждого героя.</footer>`));
+    app.appendChild(wrap);
+
+    document.getElementById('backToMap').addEventListener('click', ()=>{ session = null; renderMap(); });
+    updateProgressBar();
+
+    // click-to-select character
+    charList.querySelectorAll('.char-card').forEach(card=>{
+      card.addEventListener('click', ()=> selectCharacter(card.dataset.people));
+      // drop target
+      card.addEventListener('dragover', (e)=>{ e.preventDefault(); card.classList.add('dragover'); });
+      card.addEventListener('dragleave', ()=> card.classList.remove('dragover'));
+      card.addEventListener('drop', (e)=>{
+        e.preventDefault();
+        card.classList.remove('dragover');
+        const key = e.dataTransfer.getData('text/plain');
+        attemptMatch(key, card.dataset.people);
+      });
+    });
+
+    // attribute cards: click + drag
+    attrGrid.querySelectorAll('.attr-card').forEach(card=>{
+      if(card.classList.contains('matched')) return;
+      card.addEventListener('click', ()=>{
+        if(session.selectedCharacter){
+          attemptMatch(card.dataset.key, session.selectedCharacter);
+        } else {
+          flashHint('Сначала выбери героя слева, а потом нажми на подходящую карточку.');
+        }
+      });
+      card.addEventListener('dragstart', (e)=>{
+        e.dataTransfer.setData('text/plain', card.dataset.key);
+        card.classList.add('selected');
+      });
+      card.addEventListener('dragend', ()=> card.classList.remove('selected'));
+    });
+
+    highlightSelectedCharacter();
+  }
+
+  function selectCharacter(peopleId){
+    session.selectedCharacter = session.selectedCharacter === peopleId ? null : peopleId;
+    highlightSelectedCharacter();
+  }
+  function highlightSelectedCharacter(){
+    document.querySelectorAll('.char-card').forEach(c=>{
+      c.classList.toggle('selected', c.dataset.people === session.selectedCharacter);
+    });
+  }
+
+  function attemptMatch(attrKey, peopleId){
+    const card = session.attrCards.find(c=>c.key === attrKey);
+    if(!card || session.matched.has(attrKey)) return;
+    const cardEl = document.querySelector(`.attr-card[data-key="${attrKey}"]`);
+    const person = session.peoples.find(p=>p.id === peopleId);
+
+    if(card.peopleId === peopleId){
+      session.matched.add(attrKey);
+      state.score += 10;
+      saveState();
+      if(cardEl) cardEl.classList.add('matched');
+      flashHint(`Верно! Это подходит герою «${person.name}».`, true);
+      session.selectedCharacter = null;
+      refreshCharCards();
+      updateProgressBar();
+      highlightSelectedCharacter();
+      if(session.matched.size === session.total){
+        setTimeout(finishRound, 500);
+      }
+    } else {
+      session.wrongAttempts++;
+      if(cardEl){
+        cardEl.classList.add('wrong');
+        setTimeout(()=>cardEl.classList.remove('wrong'), 350);
+      }
+      flashHint(`Хм, не похоже. Подумай, кому из героев подойдёт «${card.text}» — попробуй ещё раз!`);
+    }
+  }
+
+  function refreshCharCards(){
+    session.peoples.forEach(p=>{
+      const doneCount = ['costume','dish','speech'].filter(t=>session.matched.has(p.id+'-'+t)).length;
+      const cardEl = document.querySelector(`.char-card[data-people="${p.id}"]`);
+      if(cardEl) cardEl.classList.toggle('complete', doneCount === 3);
+    });
+  }
+
+  function updateProgressBar(){
+    const fill = document.getElementById('progressFill');
+    if(fill) fill.style.width = Math.round((session.matched.size/session.total)*100) + '%';
+  }
+
+  let hintTimer = null;
+  function flashHint(text, positive){
+    const banner = document.getElementById('hintBanner');
+    if(!banner) return;
+    banner.textContent = (positive ? '🎉 ' : '💡 ') + text;
+    banner.style.background = positive ? '#EAF7F5' : '#FFF1DC';
+    banner.style.borderColor = positive ? 'var(--teal)' : 'var(--gold)';
+    banner.style.color = positive ? '#1F5F5A' : '#7A5417';
+    banner.classList.add('show');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(()=> banner.classList.remove('show'), 2600);
+  }
+
+  /* =========================================================
+     ЭКРАН: РЕЗУЛЬТАТ
+  ==========================================================*/
+  function finishRound(){
+    const { regionId, region, peoples, wrongAttempts } = session;
+    let stars = 3;
+    if(wrongAttempts >= 5) stars = 1;
+    else if(wrongAttempts >= 2) stars = 2;
+
+    const alreadyDone = state.completedRegions.includes(regionId);
+    if(!alreadyDone) state.completedRegions.push(regionId);
+    if(!state.badges.includes(regionId)) state.badges.push(regionId);
+    state.score += stars * 5;
+    saveState();
+
+    const badge = REGION_BADGES[regionId];
+    const fact = peoples[Math.floor(Math.random()*peoples.length)];
+    const nextIndex = REGIONS.findIndex(r=>r.id === regionId) + 1;
+    const hasNext = nextIndex < REGIONS.length && isRegionUnlocked(nextIndex);
+
+    app.innerHTML = '';
+    const wrap = el(`
+      <div>
+        <div class="panel result-wrap">
+          <div class="stars">${'⭐'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+          <h2>Регион «${region.name}» пройден!</h2>
+          <p class="result-score">+${stars*5} очков за звёзды раунда · всего ${state.score}</p>
+          <div class="badge-earned">
+            <span class="emoji">${badge.emoji}</span>
+            <span class="name">Значок «${badge.name}»</span>
+          </div>
+          <div class="fact-box"><b>А вы знали, что…</b><br>${fact.fact}</div>
+          <div class="result-actions">
+            ${hasNext ? `<button class="btn btn-primary" id="playNext">Играть дальше</button>` : ''}
+            <button class="btn btn-secondary" id="toMap">Вернуться на карту</button>
+          </div>
+        </div>
+        <footer class="credit">Прогресс и очки сохранены автоматически.</footer>
+      </div>
+    `);
+    app.appendChild(wrap);
+
+    const playNext = document.getElementById('playNext');
+    if(playNext){
+      playNext.addEventListener('click', ()=> startRound(REGIONS[nextIndex].id));
+    }
+    document.getElementById('toMap').addEventListener('click', ()=>{ session = null; renderMap(); });
+  }
+
+  /* =========================================================
+     СТАРТ ПРИЛОЖЕНИЯ
+  ==========================================================*/
+  function init(){
+    if(!state.difficulty){
+      renderStart();
+    } else {
+      renderMap();
+    }
+  }
+  init();
+})();
+</script>
+</body>
+</html>
